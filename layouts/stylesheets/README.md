@@ -2,18 +2,18 @@
 
 We will have a MainContainer used for Routing
 
-Ex:
-- localhost://login
-App
-	MainContainer
-		form
-		... more components
-	/MainContainer
-/App
-
-- localhost://restaurant/:session_id
-App
-	MainContainer
-		a different Component... more
-	/MainContainer
-App
+<b>Ex:</b>
+- localhost://login<br>
+App<br>
+&nbsp;&nbsp;	MainContainer<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;	form<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;	... more components<br>
+&nbsp;&nbsp;   /MainContainer<br>
+/App<br>
+<br>
+- localhost://restaurant/:session_id<br>
+App<br>
+&nbsp;&nbsp;	MainContainer<br>
+&nbsp;&nbsp;&nbsp;&nbsp;		a different Component... more<br>
+&nbsp;&nbsp;	/MainContainer<br>
+App<br>
