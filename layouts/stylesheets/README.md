@@ -4,16 +4,16 @@ We will have a MainContainer used for Routing
 
 Ex:
 - localhost://login
-<App>
-	<MainContainer>
-		<form>
+App
+	MainContainer
+		form
 		... more components
-	</MainContainer>
-</App>
+	/MainContainer
+/App
 
 - localhost://restaurant/:session_id
-<App>
-	<MainContainer>
-		<a Component>... more
-	</MainContainer>
-</App>
+App
+	MainContainer
+		a different Component... more
+	/MainContainer
+App
