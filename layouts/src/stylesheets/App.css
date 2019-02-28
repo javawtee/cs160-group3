@@ -1,0 +1,17 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+
+.App {
+  text-align: center;
+  padding: 0 10%;
+  background: black;
+}
+
+.Login {
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+  background: #fff;
+  min-height: 100vh;
+}
