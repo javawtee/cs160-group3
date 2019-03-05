@@ -10,11 +10,11 @@ class App extends Component {
       <div className="App">
         <Route exact path='/' render={props => (
             <div className='Login'>
-              OUR MOTTO HERE<br/>
-              MAYBE SOME INTRODUCTION HERE<hr/><br/><br/><br/>
+              <br/><h1>Drop Off</h1><br/>
+              <h2> Welcome to our Delivery Service</h2><br/><br/><br/>
               <form>
-                userid: <TextField placeholder='userID' /><br/> 
-                password: <TextField type='password' /><br/>
+                UserID: <TextField placeholder='          userID'/> <br/> 
+                Password: <TextField type='password'/><br/>
                 <Button type='submit'>Login</Button>
               </form>
             </div>
