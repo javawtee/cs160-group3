@@ -1,69 +1,83 @@
 import React, { Component } from 'react';
-import TextField from '@material-ui/core/TextField'
-import Button from '@material-ui/core/Button'
+import {Route} from 'react-router-dom'
 
-import User from './User'
-import { Checkbox } from '@material-ui/core';
+import LoginForm from './layouts/forms/LoginForm'
+import UserConsole from './layouts/UserConsole'
+
+import './App.css'
 
 class App extends Component {
   state = {
-    userName : '',
-    userID: '',
-    password: '',
-    pwtype: 'password', // default
-    showPwChecked: false
+    login: false,
+    signup: false,
+    session_username: '', //should pass a session as prop, this is just for test purpose
   }
 
-  onChange = (e) => {
-    this.setState({[e.target.name]:e.target.value})
-  } // this is how we get value of text inputs in React
+  componentWillMount(){
+    //
+  }
 
-  onSubmit = (e) => {
+  componentDidUpdate(){
+    if(this.state.session_username !== ''){
+      sessionStorage.setItem('username', this.state.session_username)
+      window.location.href = '/console'
+    }
+  }
+
+  formClick = (form) => {
+    var login = !this.state.login
+    var signup = !this.state.signup
+    if(form === 'login')
+      this.setState({login, signup: false})
+    else
+      this.setState({signup, login: false})
+  }
+
+  onLogin = (e, userID, password) => {
     e.preventDefault();
-    if(this.state.userID !== '' && this.state.password !== ''){
-      fetch('/testpage', 
-      {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({userID: this.state.userID, 
-                              password: this.state.password})
-      })
-      .then(res => res.json())
-      .then(payload => {
+    if(userID !== '' && password !== ''){
+        fetch('/testpage', 
+          {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({userID, password})
+        })
+        .then(res => res.json())
+        .then(payload => {
         if(payload.numOfResults === 0)
           alert('userID or password is incorrect')
         else
-          this.setState({userName: payload.results[0]})
-      }) // whenever setState is called, this component will be re-rendered
+          this.setState({session_username: payload.results[0]})
+            //this.setState({userName: payload.results[0]}) //should redirect to UserConsole here
+        }) // whenever setState is called, this component will be re-rendered
     } else 
-      alert('userID or password cannot be empty')
-  }
-
-  cbOnChange = (e) => {
-    this.setState({showPwChecked: !this.state.showPwChecked}, () => {
-      if(this.state.showPwChecked)
-        this.setState({pwtype: 'text'})
-      else
-        this.setState({pwtype: 'password'})
-    })
+        alert('userID or password cannot be empty')
   }
 
   render() {
+    const {login, signup} = this.state
     return (
       <div className="App" >
-        <form onSubmit={this.onSubmit} >
-          OUR MOTTO HERE<br/>
-          MAYBE SOME INTRODUCTION HERE<hr/><br/><br/><br/>
-            userid: <TextField name='userID' value={this.state.userID} onChange={this.onChange} placeholder='your userID' autoFocus/><br/> 
-            password: <TextField name='password' value={this.state.password} onChange={this.onChange} type={this.state.pwtype}
-                                  onFocus={() =>this.setState({password: ''})}/><br/>
-            <Checkbox name='visiblepw' checked={this.state.showPwChecked} onChange={this.cbOnChange}/>Show password<br/>
-            <Button type='submit' >Login</Button>
-        </form>
-        <User userName={this.state.userName} />
+        <Route exact path='/' render={() => {
+          return (
+            <div id='home-container'>
+              <div id='home-nav'>
+              </div>
+              <div id='home-div'>
+                <div className='home-common-div' onClick={() =>this.formClick('login')}>Login</div>
+                <div className='login-form home-common-div' style={{display: login? 'block': 'none' }}>
+                  <LoginForm onLogin={(e,userID,password) => this.onLogin(e,userID,password)}/>
+                </div>
+                <div className='home-common-div' onClick={() =>this.formClick('signup')}>Sign up</div>
+                <div className='signup-form home-common-div' style={{display: signup? 'block': 'none' }}>Sign up Form</div>
+              </div>
+            </div>
+          )
+        }}/>
+        <Route path='/console' component={UserConsole}/>
       </div>
     );
   }

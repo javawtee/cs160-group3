@@ -1,10 +1,67 @@
 * {
+  box-sizing: border-box;
   padding: 0;
   margin: 0;
 }
 
 .App {
   text-align: center;
-  padding: 0 10%;
-  background: black;
+  padding: 0 20vw;
+  color: #fff;
+}
+
+#home-container {
+  background: #fff;
+  color: blue;
+  vertical-align: middle;
+  min-height: 100vh;
+  padding-top: 10vh;
+}
+
+#home-nav{
+  position:fixed;
+  top: 0;
+  width: 60vw;
+  height: 5vh;
+  border: thin solid black;
+  font-size: 1.5vw;
+  z-index: 1;
+}
+
+#home-div {
+  position: relative;
+  width: 50%;
+  margin: 0 25%;
+}
+
+.home-common-div{
+  height: 8vh;
+  cursor: pointer;
+  margin-bottom: 1%;
+  background: #141E30;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #243B55, #141E30);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #243B55, #141E30); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  color: #fff;
+  font-size: 1.5vw;
+  padding-top: 3%;
+}
+
+.login-form, .signup-form{
+  display: none;
+  cursor: auto;
+  background: #fff;
+  color: #141E30;
+  border: thin solid black;
+  height: auto;
+}
+
+#pw-eye {
+  background-size: cover;
+  width: 3vw;
+  height: 5vh;
+  position: absolute;
+  left: 22vw;
+  top: 14.5vh;
+  z-index: 2;
+  cursor: pointer;
 }
