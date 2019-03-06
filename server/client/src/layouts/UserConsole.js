@@ -8,17 +8,15 @@ export class UserConsole extends Component {
 
     logOut = (e) => {
         e.preventDefault();
-        console.log('asdaf')
         sessionStorage.setItem('username', '')
         window.location.href = '/'
     }
 
     componentWillMount(){
-        this.setState({username:sessionStorage.getItem('username')}, () => {
-            if(this.state.username === ''){
-                window.location.href = '/'
-            }
-        })
+        if(sessionStorage.getItem('username') === ''){
+            window.location.href = '/'
+        } else
+        this.setState({username:sessionStorage.getItem('username')})
     }
 
   render() {

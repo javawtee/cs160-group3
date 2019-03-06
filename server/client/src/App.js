@@ -13,10 +13,6 @@ class App extends Component {
     session_username: '', //should pass a session as prop, this is just for test purpose
   }
 
-  componentWillMount(){
-    //
-  }
-
   componentDidUpdate(){
     if(this.state.session_username !== ''){
       sessionStorage.setItem('username', this.state.session_username)
@@ -62,20 +58,24 @@ class App extends Component {
     return (
       <div className="App" >
         <Route exact path='/' render={() => {
-          return (
-            <div id='home-container'>
-              <div id='home-nav'>
-              </div>
-              <div id='home-div'>
-                <div className='home-common-div' onClick={() =>this.formClick('login')}>Login</div>
-                <div className='login-form home-common-div' style={{display: login? 'block': 'none' }}>
-                  <LoginForm onLogin={(e,userID,password) => this.onLogin(e,userID,password)}/>
+          if(sessionStorage.getItem('username') !== '')
+            window.location.href = '/console'
+          else {
+            return (
+              <div id='home-container'>
+                <div id='home-nav'>
                 </div>
-                <div className='home-common-div' onClick={() =>this.formClick('signup')}>Sign up</div>
-                <div className='signup-form home-common-div' style={{display: signup? 'block': 'none' }}>Sign up Form</div>
+                <div id='home-div'>
+                  <div className='home-common-div' onClick={() =>this.formClick('login')}>Login</div>
+                  <div className='login-form home-common-div' style={{display: login? 'block': 'none' }}>
+                    <LoginForm onLogin={(e,userID,password) => this.onLogin(e,userID,password)}/>
+                  </div>
+                  <div className='home-common-div' onClick={() =>this.formClick('signup')}>Sign up</div>
+                  <div className='signup-form home-common-div' style={{display: signup? 'block': 'none' }}>Sign up Form</div>
+                </div>
               </div>
-            </div>
-          )
+            )
+          }
         }}/>
         <Route path='/console' component={UserConsole}/>
       </div>
