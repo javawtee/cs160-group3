@@ -25,20 +25,17 @@ const connection = mysql.createConnection({
   database: 'testdb'
 })
 
-
-app.get('/', (req, res) => {
-  connection.connect((err) => {
-    if(err) res.send('Welcome to Express JS. You are disconnected')
-    else res.send('Welcome to Express JS. You are connected')
-  })
+connection.connect((err) => {
+  if(err) console.log('Welcome to Express JS. You are disconnected')
+  else console.log('Welcome to Express JS. You are connected')
 })
-
 
 app.post('/testpage', (req, res) => {
   //var uid = 'tester1'
   //var pw = 'testerpw1'
   var uid = req.body.userID
   var pw = req.body.password
+  console.log('SELECT user_name FROM users WHERE user_id =\'' + uid + '\' AND password=\'' + pw + '\'')
   connection.query('SELECT user_name FROM users WHERE user_id =\'' + uid + '\' AND password=\'' + pw + '\'', (err, rows, fields) => {
     if(err) throw err
     else {
