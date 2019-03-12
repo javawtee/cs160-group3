@@ -1,0 +1,23 @@
+#registration-form-container {
+    margin: 0;
+}
+
+#registration-form-container ul {
+    list-style-type: none;
+    display: flex;
+}
+
+#registration-form-container ul>li {
+    color: #fff;
+    padding: 1vh 2.5vw;
+    background: #7d8289;
+	border-top: 5px solid transparent;
+	border-left: 10px solid #555;
+	border-bottom: 5px solid transparent;
+}
+
+#registration-content {
+    margin-top: 1%;
+    width: 100%;
+    height: auto;
+}
