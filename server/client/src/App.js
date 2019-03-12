@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import {Route} from 'react-router-dom'
 
+import DriverApplicationForm from './layouts/forms/DriverApplicationForm'
 import LoginForm from './layouts/forms/LoginForm'
+import RegistrationForm from './layouts/forms/RegistrationForm'
 import UserConsole from './layouts/UserConsole'
 
 import './App.css'
@@ -9,7 +11,8 @@ import './App.css'
 class App extends Component {
   state = {
     login: false,
-    signup: false,
+    register: false,
+    applyForDriver: false,
     session_username: '', //should pass a session as prop, this is just for test purpose
   }
 
@@ -22,11 +25,18 @@ class App extends Component {
 
   formClick = (form) => {
     var login = !this.state.login
-    var signup = !this.state.signup
-    if(form === 'login')
-      this.setState({login, signup: false})
-    else
-      this.setState({signup, login: false})
+    var register = !this.state.register
+    var applyForDriver = !this.state.applyForDriver
+    switch(form){
+      case 'login':
+        return this.setState({login, register: false, applyForDriver: false})
+      case 'register':
+        return this.setState({register, login: false, applyForDriver: false})
+      case 'apply-for-driver':
+        return this.setState({applyForDriver, login: false, register: false})
+      default:
+        return this.setState({register: false, login: false, applyForDriver: false})
+    }
   }
 
   onLogin = (e, userID, password) => {
@@ -54,24 +64,30 @@ class App extends Component {
   }
 
   render() {
-    const {login, signup} = this.state
+    const {login, register, applyForDriver} = this.state
     return (
       <div className="App" >
         <Route exact path='/' render={() => {
-          if(sessionStorage.getItem('username') !== '')
+          if(sessionStorage.getItem('username'))
             window.location.href = '/console'
           else {
             return (
               <div id='home-container'>
-                <div id='home-nav'>
+                <div>
                 </div>
                 <div id='home-div'>
+                  <div className='home-common-div' onClick={() =>this.formClick('apply-for-driver')}>Apply For Driver</div>
+                  <div className='driver-application-form home-common-div' style={{display: applyForDriver? 'block': 'none' }}>
+                    <DriverApplicationForm />
+                  </div>
                   <div className='home-common-div' onClick={() =>this.formClick('login')}>Login</div>
                   <div className='login-form home-common-div' style={{display: login? 'block': 'none' }}>
                     <LoginForm onLogin={(e,userID,password) => this.onLogin(e,userID,password)}/>
                   </div>
-                  <div className='home-common-div' onClick={() =>this.formClick('signup')}>Sign up</div>
-                  <div className='signup-form home-common-div' style={{display: signup? 'block': 'none' }}>Sign up Form</div>
+                  <div className='home-common-div' onClick={() =>this.formClick('register')}>Register</div>
+                  <div className='registration-form home-common-div' style={{display: register? 'block': 'none' }}>
+                    <RegistrationForm />
+                  </div>
                 </div>
               </div>
             )

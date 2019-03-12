@@ -2,6 +2,8 @@
   box-sizing: border-box;
   padding: 0;
   margin: 0;
+  font-size: 1em;
+  line-height: 1.2;
 }
 
 .App {
@@ -10,12 +12,33 @@
   color: #fff;
 }
 
+button {
+  text-transform: uppercase;
+  background: #243B55;
+  border-radius: 4px;
+  border: transparent;
+  padding: 2%;
+  margin: 2% 0;
+  color: #fff;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #3887ff;
+  transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms
+}
+
+table{
+  width: 100%;
+  text-align: left;
+}
+
 #home-container {
   background: #fff;
   color: blue;
   vertical-align: middle;
   min-height: 100vh;
-  padding-top: 10vh;
+  padding: 1vh 0;
 }
 
 #home-nav{
@@ -24,44 +47,64 @@
   width: 60vw;
   height: 5vh;
   border: thin solid black;
-  font-size: 1.5vw;
   z-index: 1;
 }
 
 #home-div {
   position: relative;
-  width: 50%;
-  margin: 0 25%;
+  width: 60%;
+  margin: 0 20%;
 }
 
 .home-common-div{
-  height: 8vh;
+  height: 7vh;
   cursor: pointer;
   margin-bottom: 1%;
   background: #141E30;  /* fallback for old browsers */
   background: -webkit-linear-gradient(to right, #243B55, #141E30);  /* Chrome 10-25, Safari 5.1-6 */
   background: linear-gradient(to right, #243B55, #141E30); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
   color: #fff;
-  font-size: 1.5vw;
-  padding-top: 3%;
+  font-size: 2em !important;
 }
 
-.login-form, .signup-form{
+.driver-application-form, .login-form, .registration-form{
   display: none;
   cursor: auto;
   background: #fff;
   color: #141E30;
   border: thin solid black;
   height: auto;
+  width: 100%;
+  padding: 3% 5%;
+  font-size: 1.2em !important;
 }
 
 #pw-eye {
   background-size: cover;
-  width: 3vw;
-  height: 5vh;
-  position: absolute;
-  left: 22vw;
-  top: 14.5vh;
-  z-index: 2;
+  width: 3.5vw;
+  z-index: 3;
   cursor: pointer;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 2px 0;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.show-password-ttt{
+  width: 10vw !important;
+  left: 98%;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
 }
