@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
-import {Route} from 'react-router-dom'
+import {BrowserRouter, Route, Switch, Link, Redirect} from 'react-router-dom';
 
-import DriverApplicationForm from './layouts/forms/DriverApplicationForm'
-import LoginForm from './layouts/forms/LoginForm'
-import RegistrationForm from './layouts/forms/RegistrationForm'
-import UserConsole from './layouts/UserConsole'
+import DriverApplicationForm from './layouts/forms/DriverApplicationForm';
+import LoginForm from './layouts/forms/LoginForm';
+import RegistrationForm from './layouts/forms/RegistrationForm';
+import UserConsole from './layouts/UserConsole';
 
-import './App.css'
+import Restaurant from './layouts/Restaurant';
+
+import './App.css';
 
 class App extends Component {
   state = {
@@ -64,8 +66,10 @@ class App extends Component {
   }
 
   render() {
+    
     const {login, register, applyForDriver} = this.state
     return (
+      <BrowserRouter>
       <div className="App" >
         <Route exact path='/' render={() => {
           if(sessionStorage.getItem('username'))
@@ -93,9 +97,15 @@ class App extends Component {
             )
           }
         }}/>
-        <Route path='/console' component={UserConsole}/>
-      </div>
+
+        <Route exact path='/console' component={UserConsole}/>
+        <Route exact path='/restaurant' component={Restaurant}/>
+
+      </div> 
+      </BrowserRouter>
     );
+
+
   }
 }
 

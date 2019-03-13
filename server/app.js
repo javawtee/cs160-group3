@@ -30,6 +30,18 @@ connection.connect((err) => {
   else console.log('Welcome to Express JS. You are connected')
 })
 
+app.post('/uh', function(request, response) {
+  //response.send(request.query.info_option);
+  //response.send(request.query.id);
+  var html = '';
+  html += "<table border='2'><tbody><tr><th>Create Time</th><th>Id</th><th>Tweet Text</th></tr>";
+  
+  html += "</tbody>";
+  html += "</table>";
+  html += "<p><a href=\"/\">Return to main page</a>";
+  response.send(html);
+});
+
 app.post('/testpage', (req, res) => {
   //var uid = 'tester1'
   //var pw = 'testerpw1'
