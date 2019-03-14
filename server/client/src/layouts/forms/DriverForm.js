@@ -106,16 +106,10 @@ export class DriverForm extends Component {
 
   render() {
     return (
-      <div className="container">
+      <div>
         <Validate onRef={validator => this.setState({validator})}/>
         <form onSubmit={this.handleSubmit}>
-            <div className="row" style={{textAlign: "left", padding: "0 5%", fontSize: "0.8vw", lineHeight: "0.8"}}>
-                <div className="col" style={{textAlign:"center"}}>
-                    <h2>Driver's Application Form</h2>
-                    <hr/>
-                </div>
-                <div className="w-100"></div>
-
+            <div className="row" style={{padding: "2% 10%"}}>
                 <div className="col">
                 <label>User ID:</label>
                   <input style={this.toggleError(0)} type="text" className="form-control" name="userName" autoFocus

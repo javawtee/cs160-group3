@@ -110,11 +110,6 @@ export class RestaurantForm extends Component {
           <Validate onRef={validator => this.setState({validator})}/> 
           <form onSubmit={this.handleSubmit}>
               <div className="row" style={{padding: "2% 10%"}}>
-                  <div className="col" style={{textAlign:"center"}}>
-                      <h4>Business Information</h4>
-                      <hr/>
-                  </div>
-                  <div className="w-100"></div>
                   <div className="col">
                       <label>Username:</label>
                       <input style={this.toggleError(0)} type="text" className="form-control" name="userName" autoFocus
