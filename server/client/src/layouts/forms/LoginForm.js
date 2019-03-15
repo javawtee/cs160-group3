@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import Auth from "../../components/Auth";
-import App from "../../App";
 
 import { Checkbox } from '@material-ui/core';
 
