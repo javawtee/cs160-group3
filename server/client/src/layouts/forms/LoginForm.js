@@ -8,7 +8,8 @@ export class LoginForm extends Component {
       super(props);
       this.state = {    
         userName: '',
-        password: ''
+        password: '',
+        saveLocal: false,
       };
     }
 
@@ -31,7 +32,7 @@ export class LoginForm extends Component {
               alert("Username or Password is incorrect")
             else {
               alert("successfully logged in")
-              Auth.login(payload.results[0]); // create session
+              Auth.login(this.state.saveLocal, payload.results[0]); // create session
               this.props.switchToConsole(); // passing to HomePage
             }
             //this.setState({session_username: payload.results[0]})
@@ -62,6 +63,7 @@ export class LoginForm extends Component {
                           value={this.state.userName} onChange={this.handleOnChange} autoFocus autoComplete='off'/>
                 </div>
               </div>
+
               <div className="w-100"></div>
               <div className="col">
                 <div className="input-group mb-3">
@@ -75,11 +77,16 @@ export class LoginForm extends Component {
                           onFocus={() =>this.setState({password: ''})}/>
                 </div>
               </div>
+
               <div className="w-100"></div>
               <div className="col">
-                <Checkbox onChange={()=>alert('building...')}/> Save password<br/>
-                <a href='aDialog' onClick={()=>alert('building...')}>Forgot password?</a><br/>
-                <button className="btn btn-primary" type='submit'>Login</button>
+                <Checkbox onChange={() => this.setState({saveLocal: true})}/> Save password<br/>
+                <a href='aDialog' onClick={()=>alert('building...')}>Forgot password?</a><br/><br/>
+              </div>
+
+              <div className="w-100"></div>
+              <div className="col-12">
+                <button className="col btn btn-primary" type='submit'>Login</button>
               </div>
             </div>
           </div>

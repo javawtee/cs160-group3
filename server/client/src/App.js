@@ -9,7 +9,7 @@ import "./App.css"
 
 class App extends Component {
     state = {
-      authenticated: Auth.checkAuth(),
+      authenticated: Auth.isAuthenticated(),
     }
 
   render() {
