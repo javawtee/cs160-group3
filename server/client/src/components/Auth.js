@@ -3,21 +3,21 @@ import PropTypes from "prop-types";
 
 class Auth {
     userName = null;
-    login = (userName) => {
+    login = (storeLocal, userName) => {
         this.userName = userName;
-        sessionStorage.setItem("user-token", getToken(userName)); // token only exists if user logged in
-    }
-
-    checkAuth(){
-        const token = sessionStorage.getItem("user-token");
-        if(token === null) // != null ==> userToken exists
-            return false;
-
-        return true;
+        const token = getToken(this.userName);
+        sessionStorage.setItem("user-token", token); // token only exists if user logged in
+        if(storeLocal)
+            localStorage.setItem("user-token", token)
     }
 
     isAuthenticated(){
-        return sessionStorage.getItem("user-session") !== this.userToken;
+        const localToken = localStorage.getItem("user-token");
+        const token = sessionStorage.getItem("user-token");
+        if(localToken === null && token === null) // != null ==> userToken exists
+            return false;
+
+        return true;
     }
 }
 
