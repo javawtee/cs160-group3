@@ -21,13 +21,12 @@ export class HomePage extends Component {
     
     componentDidMount(){
         this.setState({navBarHeight: this.refs.navBar.clientHeight});
-        
     }
 
     getContent(){
         switch(this.state.currentContent){
             case "login":
-                return <LoginForm />;
+                return <LoginForm switchToConsole={this.props.switchToConsole}/>; // pass to App
             case "sign-up":
                 return <SignUp />;
             case "about":
