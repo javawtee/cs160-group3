@@ -1,4 +1,7 @@
 import React, { Component } from 'react'
+import Auth from "../../components/Auth";
+import App from "../../App";
+
 import { Checkbox } from '@material-ui/core';
 
 export class LoginForm extends Component {
@@ -11,8 +14,8 @@ export class LoginForm extends Component {
     }
 
     onLogin = (e) => {
-      const {userName, password} = this.state;
       e.preventDefault();
+      const {userName, password} = this.state;
       if(userName !== "" && password !== ""){
           fetch("/login", 
             {
@@ -25,10 +28,13 @@ export class LoginForm extends Component {
           })
           .then(res => res.json())
           .then(payload => {
-          if(payload.numOfResults === 0)
-            alert("Username or Password is incorrect")
-          else
-            alert("successfully logged in")
+            if(payload.numOfResults === 0)
+              alert("Username or Password is incorrect")
+            else {
+              alert("successfully logged in")
+              Auth.login(payload.results[0]); // create session
+              this.props.switchToConsole(); // passing to HomePage
+            }
             //this.setState({session_username: payload.results[0]})
               //this.setState({userName: payload.results[0]}) //should redirect to UserConsole here
           }) // whenever setState is called, this component will be re-rendered
