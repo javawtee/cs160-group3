@@ -3,6 +3,7 @@ import {Link} from "react-router-dom";
 
 import LoginForm from "./forms/LoginForm";
 import SignUp from "./SignUp";
+import About from "./About";
 
 export class HomePage extends Component {
     constructor(props){
@@ -14,7 +15,8 @@ export class HomePage extends Component {
     }
 
     componentWillMount(){
-        this.setState({currentContent:this.props.content})
+        const currentContent = this.props.content;
+        this.setState({currentContent});
     }
     
     componentDidMount(){
@@ -26,10 +28,12 @@ export class HomePage extends Component {
         switch(this.state.currentContent){
             case "login":
                 return <LoginForm />;
-            case "signUp":
+            case "sign-up":
                 return <SignUp />;
+            case "about":
+                return <About />;
             default:
-                return <div>broken</div>
+                return <div>CONTENT NOT FOUND</div>
         }
     }
 
@@ -56,8 +60,13 @@ export class HomePage extends Component {
                     </Link>
                 </li>
                 <li>
-                    <Link className={currentContent === "signUp" ? "nav-item active" : "nav-item"} to="/signUp">
+                    <Link className={currentContent === "sign-up" ? "nav-item active" : "nav-item"} to="/sign-up">
                         <div className="nav-link">Sign up</div>
+                    </Link>
+                </li>
+                <li>
+                    <Link className={currentContent === "about" ? "nav-item active" : "nav-item"} to="/about">
+                        <div className="nav-link">About</div>
                     </Link>
                 </li>
             </ul>
