@@ -35,7 +35,7 @@ export class SignUp extends Component {
         <div className="row" style={{textAlign: "left", padding: "0 5%", marginTop: "-20%", fontSize: "0.8vw", lineHeight: "0.8"}}>
             <div className="col">
                 <div className="row">
-                    <div className="step-col col border bg-light"><h6>STEP 1: SO, YOU ARE ...</h6></div>
+                    <div className="step-col col border bg-light"><h6>SO, YOU ARE ...</h6></div>
                     <div className="w-100" style={{textAlign: "center"}}>
                         <button className="btn btn-secondary"
                             style={{display: this.state.currentStep === 2? "" : "none"}} disabled>
@@ -46,16 +46,17 @@ export class SignUp extends Component {
                            <a href="#">You are not?</a>
                         </span>
                     </div>
-                    <div className="col border" 
+                    <div className="col" 
                             style={{textAlign: "center", padding: "1% 2%", display: this.state.currentStep === 2 ? "none" : ""}}>
                         <button className="btn btn-secondary" name="driver" onClick={this.handleStep1OnClick}>Driver</button><br/><br/>
                         <button className="btn btn-secondary" name="restaurant" onClick={this.handleStep1OnClick}>Restaurant</button>
                     </div>
                 </div>
                 <div className="row">
-                    <div className="step-col col border bg-light"><h6>STEP 2: YOUR INFORMATION</h6></div>
+                    <div className="step-col col border bg-light"
+                            style={{display: this.state.currentStep === 2 ? "" : "none"}}><h6>SIGN UP FORM</h6></div>
                     <div className="w-100"></div>
-                    <div className="col border" style={{padding: "1% 0"}}>
+                    <div className="col" style={{padding: "2% 0", marginTop: "-3%"}}>
                         {this.getStep2Content()}
                     </div>
                 </div>

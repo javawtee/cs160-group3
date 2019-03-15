@@ -30,10 +30,10 @@ connection.connect((err) => {
   else console.log('Welcome to Express JS. You are connected')
 })
 
-app.post('/testpage', (req, res) => {
+app.post('/login', (req, res) => {
   //var uid = 'tester1'
   //var pw = 'testerpw1'
-  var uid = req.body.userID
+  var uid = req.body.userName
   var pw = req.body.password
   console.log('SELECT user_name FROM users WHERE user_id =\'' + uid + '\' AND password=\'' + pw + '\'')
   connection.query('SELECT user_name FROM users WHERE user_id =\'' + uid + '\' AND password=\'' + pw + '\'', (err, rows, fields) => {
