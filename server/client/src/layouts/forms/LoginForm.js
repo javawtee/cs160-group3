@@ -29,9 +29,9 @@ export class LoginForm extends Component {
           .then(res => res.json())
           .then(payload => {
             if(payload.numOfResults === 0)
-              alert("Username or Password is incorrect")
+              alert("Username or Password is incorrect");
             else {
-              alert("successfully logged in")
+              alert("successfully logged in");
               Auth.login(this.state.saveLocal, payload.results[0]); // create session
               this.props.switchToConsole(); // passing to HomePage
             }
