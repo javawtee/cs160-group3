@@ -56,7 +56,7 @@ export class LoginForm extends Component {
                 <div className="input-group mb-3">
                   <div className="input-group-prepend">
                     <span className="input-group-text">
-                      <img src="/media/user-ico.png" width="100%"/>
+                      <img src="/media/user-ico.png" alt="" width="100%"/>
                     </span>
                   </div>
                   <input type="text" className="form-control" placeholder="Username" name="userName"
@@ -69,7 +69,7 @@ export class LoginForm extends Component {
                 <div className="input-group mb-3">
                   <div className="input-group-prepend">
                     <span className="input-group-text">
-                      <img src="/media/key-ico.png" width="100%"/>
+                      <img src="/media/key-ico.png" alt="" width="100%"/>
                     </span>
                   </div>
                   <input type="password" className="form-control" placeholder="Password" name="password"
