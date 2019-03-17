@@ -10,6 +10,8 @@ export class SignUp extends Component {
     }
     handleStep1OnClick = this.handleStep1OnClick.bind(this);
 
+    
+
     handleStep1OnClick(e){
         var step1Selection;
         if(e.target.name === "driver")

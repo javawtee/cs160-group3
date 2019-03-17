@@ -5,16 +5,14 @@ import Validate from "../../components/Validate";
 
 export class DriverForm extends Component {
     state = {
-        validator : null,
-        userName: "",
+        userId: "",
         password: "",
         confirmPassword: "",
         lastName: "",
         firstName: "",
         phoneNumber: "",
         email: "",
-        driverLicensePhoto: null,
-        errors: [false, false, false, false]        
+        errors: [false, false, false, false, false, false, false]        
     }
     handleOnChange = this.handleOnChange.bind(this)
     handleSubmit = this.handleSubmit.bind(this)
@@ -22,7 +20,7 @@ export class DriverForm extends Component {
     handleOnChange(e){
         var newErrors = this.state.errors;
         switch(e.target.name){
-            case "userName":
+            case "userId":
                 newErrors[0] = false;
                 break;
             case "password":
@@ -50,45 +48,42 @@ export class DriverForm extends Component {
 
     handleSubmit(e){
         e.preventDefault();
-        const {userName, password, confirmPassword, lastName, firstName, phoneNumber, email} = this.state;
+        const {userId, password, confirmPassword, lastName, firstName, phoneNumber, email} = this.state;
         var newErrors = this.state.errors; // by using clone ==> avoid state mutation in React-pattern
-        newErrors[0] = !this.state.validator.notEmpty(userName); // true: notEmpty ==> newErrors[0] = false
+        newErrors[0] = !Validate.validUserId(userId); // true: notEmpty ==> newErrors[0] = false
 
-        newErrors[1] = !this.state.validator.validPassword(password); // true: length > 6 and strength score > 1 ==> newErrors[1] = false
+        newErrors[1] = !Validate.validPassword(password); // true: length > 6 and strength score > 1 ==> newErrors[1] = false
 
-        newErrors[2] = !this.state.validator.validConfirmPassword(password, confirmPassword); // true: matched ==> newErrors[2] = false
+        newErrors[2] = !Validate.validConfirmPassword(password, confirmPassword); // true: matched ==> newErrors[2] = false
 
-        newErrors[3] = !this.state.validator.notEmpty(lastName); // true: notEmpty ==> newErrors[3] = false
+        newErrors[3] = !Validate.notEmpty(lastName); // true: notEmpty ==> newErrors[3] = false
 
-        newErrors[4] = !this.state.validator.notEmpty(firstName); // true: notEmpty ==> newErrors[4] = false
+        newErrors[4] = !Validate.notEmpty(firstName); // true: notEmpty ==> newErrors[4] = false
 
-        newErrors[5] = !this.state.validator.notEmpty(phoneNumber); // true: notEmpty ==> newErrors[5] = false
-        newErrors[5] = !this.state.validator.validUSPhoneNumberFormat(phoneNumber); // true: valid ==> newErrors[5] = false
+        newErrors[5] = !Validate.validUSPhoneNumberFormat(phoneNumber); // true: valid ==> newErrors[5] = false
         
-        newErrors[6] = !this.state.validator.notEmpty(email); // true: notEmpty ==> newErrors[6] = false
-        newErrors[6] = !this.state.validator.validEmailFormat(email); // true: valid ==> newErrors[6] = false
+        newErrors[6] = !Validate.validEmailFormat(email); // true: valid ==> newErrors[6] = false
         
         if(newErrors.filter(error => error === true).length > 0) // has any error, stop submitting
             this.setState({ errors: newErrors });
         else {
-            fetch("/createAccount/driver", 
-                {
-                method: "POST",
-                headers: {
-                "Accept": "application/json",
-                "Content-Type": "application/json"
-                },
-                body: JSON.stringify({userName, password, lastName, firstName, phoneNumber, email})
-            })
-            .then(res => res.json())
-            .then(payload => {
-            if(payload.numOfResults === 0)
-                alert("Failed. Can't insert to database")
-            else
-                alert("successfully created an account")
-                //this.setState({session_username: payload.results[0]})
-                //this.setState({userName: payload.results[0]}) //should redirect to UserConsole here
-            }) // whenever setState is called, this component will be re-rendered
+            alert("added");
+            // fetch("/createAccount/driver", 
+            //     {
+            //     method: "POST",
+            //     headers: {
+            //     "Accept": "application/json",
+            //     "Content-Type": "application/json"
+            //     },
+            //     body: JSON.stringify({userId, password, lastName, firstName, phoneNumber, email})
+            // })
+            // .then(res => res.json())
+            // .then(payload => {
+            // if(payload.numOfResults === 0)
+            //     alert("Failed. Can't insert to database")
+            // else
+            //     alert("successfully created an account")
+            // }) // whenever setState is called, this component will be re-rendered
         }
     }
 
@@ -107,13 +102,12 @@ export class DriverForm extends Component {
   render() {
     return (
       <div>
-        <Validate onRef={validator => this.setState({validator})}/>
         <form onSubmit={this.handleSubmit}>
             <div className="row" style={{padding: "2% 10%"}}>
                 <div className="col">
                 <label>User ID:</label>
-                  <input style={this.toggleError(0)} type="text" className="form-control" name="userName" autoFocus
-                          value={this.state.userName} onChange={this.handleOnChange}/>
+                  <input style={this.toggleError(0)} type="text" className="form-control" name="userId" autoFocus
+                          value={this.state.userId} onChange={this.handleOnChange}/>
                   <small style={this.toggleTextError(0)} className="input-error form-text text-muted">User ID cannot be empty</small><br/>
 
                   <label>Password:</label>
@@ -160,7 +154,7 @@ export class DriverForm extends Component {
                         Empty or email format is not regconized. Format: example@domain.com
                     </small><br/><br/><br/>
                     GRecaptcha is comment blocked <br/>
-                    <GRecaptcha /><br/>
+                    {/* <GRecaptcha /><br/> */}
                     <button className="btn btn-primary" style={{marginTop: "5%"}} type='submit'>Submit</button>
                 </div>
             </div>
