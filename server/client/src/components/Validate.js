@@ -1,5 +1,3 @@
-import React, { Component } from 'react'
-
 import zxcvbn from "zxcvbn";
 
 /*  
@@ -16,14 +14,20 @@ import zxcvbn from "zxcvbn";
   4 # very unguessable: strong protection from offline slow-hash scenario. (guesses >= 10^10)
 */
 
+const userIdRegex = /^([a-zA-Z0-9]([_-]?[a-zA-Z0-9_-]){0,4}[a-zA-Z0-9]{0,14})$/; // min 6 characters, max 20; no space or special characters, but _ and -
+
 const emailRegex = 	
-/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
-const USPhoneNumberRegex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+const USPhoneNumberRegex = /^([0-9]{3})[- ]?([0-9]{3})[- ]?([0-9]{4})$/;
 
-export class Validate extends Component {
+class Validate {
   notEmpty = (value) =>{
     return value.length > 0;
+  }
+
+  validUserId = (value) => {
+    return this.notEmpty(value) && userIdRegex.test(value);
   }
 
   validPassword = (value) => {
@@ -35,29 +39,22 @@ export class Validate extends Component {
   }
 
   validEmailFormat = (value) => {
-    return emailRegex.test(value)
+    return this.notEmpty(value) && emailRegex.test(value)
   }
 
   validUSPhoneNumberFormat = (value) => {
-    return USPhoneNumberRegex.test(value)
+    return this.notEmpty(value) && USPhoneNumberRegex.test(value)
   }
 
-  componentDidMount(){
+  /*componentDidMount(){
     this.props.onRef(this);
   }
 
   componentWillUnmount(){
     this.props.onRef(undefined);
   }
-
-  render() {
-    return (
-      <React.Fragment>
-        
-      </React.Fragment>
-    )
-  }
+  */
 }
 
-export default Validate
+export default new Validate();
 
