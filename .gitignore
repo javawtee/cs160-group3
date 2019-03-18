@@ -24,3 +24,4 @@ yarn-error.log*
 server/package-lock.json
 
 server/client/package-lock.json
+server/app.js
