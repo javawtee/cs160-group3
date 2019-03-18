@@ -1,10 +1,10 @@
 import React, { Component } from 'react'
 import {Link} from "react-router-dom";
-
+import Auth from "../components/Auth";
 import DriverConsole from "./console/DriverConsole";
 
 const styles = {
-  home: { border: "1px solid red"},
+  home: { border: "1px solid red", height: "100vh", paddingTop: "15%"},
 };
 
 export class User extends Component {
@@ -20,18 +20,38 @@ export class User extends Component {
     this.console = React.createRef();
     this.history = React.createRef();
   }
-  handleScrollTo = this.handleScrollTo.bind(this)
+  handleScrollTo = this.handleScrollTo.bind(this);
   toggleChangePassword = this.toggleChangePassword.bind(this);
   handleChangePassword = this.handleChangePassword.bind(this);
 
   handleScrollTo(e){
     e.preventDefault();
-    const profile = this.profile.current;
+    var toRef = null;
+    switch(e.currentTarget.id){
+      case "console":
+        toRef = this.console.current;
+        break;
+      case "profile":
+        toRef = this.profile.current;
+        break;
+      case "history":
+        toRef = this.history.current;
+        break;
+      default:
+        toRef = null;
+        break;
+    }
     window.scrollTo({
-      top: profile.offsetTop,
+      top: toRef.offsetTop,
       left: 0,
-      behavior: "instant"
+      behavior: "auto"
     });
+  }
+
+  handleLogOut(e){
+    e.preventDefault();
+    Auth.logout();
+    window.location.href="/";
   }
 
   toggleChangePassword(e){
@@ -61,7 +81,7 @@ export class User extends Component {
   render() {
     return (
       <div>
-          <nav className="navbar navbar-expand-md navbar-dark bg-dark" ref="navBar" >
+          <nav className="navbar fixed-top navbar-expand-md navbar-dark bg-dark" ref="navBar" >
             <button className="navbar-toggler" type="button" 
                     data-toggle="collapse" data-target="#navbarSupportedContent" 
                     aria-controls="navbarSupportedContent" 
@@ -73,24 +93,24 @@ export class User extends Component {
             <div className="collapse navbar-collapse" id="navbarSupportedContent">
             <ul className="navbar-nav mr-auto">
                 <li>
-                    <Link className="nav-item" onClick={this.handleScrollTo} to="/main">
+                    <Link className="nav-item" id="console" onClick={this.handleScrollTo} to="/main">
                         <div className="nav-link active">Console</div>
                     </Link>
                 </li>
                 <li>
-                    <Link className="nav-item" onClick={this.handleScrollTo} to="/profile">
+                    <Link className="nav-item" id="profile" onClick={this.handleScrollTo} to="/profile">
                         <div className="nav-link">
                             Profile
                         </div>
                     </Link>
                 </li>
                 <li>
-                    <Link className="nav-item" onClick={this.handleScrollTo} to="/history">
+                    <Link className="nav-item" id="history" onClick={this.handleScrollTo} to="/history">
                         <div className="nav-link">History</div>
                     </Link>
                 </li>
                 <li>
-                  <Link className="nav-item" to="/logout">
+                  <Link className="nav-item" onClick={this.handleLogOut} to="/logout">
                       <div className="nav-link">Logout</div>
                   </Link>
                 </li>
@@ -123,7 +143,7 @@ export class User extends Component {
               Phone number, address, etc.
             </div>
           </div>
-          <div className="row" ref={this.history}>History</div> {/*Bills, Payments*/}
+          <div className="row" style={styles.home} ref={this.history}>History</div> {/*Bills, Payments*/}
         </div>
       </div>
     )
