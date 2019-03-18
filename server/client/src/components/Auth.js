@@ -9,6 +9,11 @@ class Auth {
             localStorage.setItem("user-token", token)
     }
 
+    logout = () => {
+        sessionStorage.removeItem("user-token");
+        localStorage.removeItem("user-token");
+    }
+
     isAuthenticated(){
         const localToken = localStorage.getItem("user-token");
         const token = sessionStorage.getItem("user-token");
