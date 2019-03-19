@@ -1,15 +1,36 @@
 import React, { Component } from 'react'
 
 export class DriverConsole extends Component {
+  constructor(props){
+    super(props);
+    this.state = {
+      started: false,
+      delivering: false,
+    }
+  }
+  handleStartStop = this.handleStartStop.bind(this);
+
+  handleStartStop(e){
+    e.preventDefault();
+    this.setState((prevState) => ({started: !prevState.started}));
+  }
+
   render() {
+    const {started, delivering} = this.state;
     return (
       <div className="container">
         <div className="row">
-          <div className="col">Status: Unavailable</div>
+          <div className="col pb-2">Status: 
+            <span style={{color: "red", fontSize: "1.1em", paddingLeft: "1%"}}>
+              {started? delivering? "DELIVERING" : "AVAILABLE" : "UNAVAILABLE"}
+            </span>
+          </div>
         </div>
         <div className="row">
           <div className="col">
-            <button className="btn btn-primary">START</button>
+            <button className="btn btn-primary" onClick={this.handleStartStop}>
+              {started? "STOP": "START"}
+            </button>
           </div>
         </div>
         <div className="row" style={{paddingTop: "2%"}}>

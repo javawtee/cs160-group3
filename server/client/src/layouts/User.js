@@ -4,7 +4,7 @@ import Auth from "../components/Auth";
 import DriverConsole from "./console/DriverConsole";
 
 const styles = {
-  home: { border: "1px solid red", height: "100vh", paddingTop: "15%"},
+  home: { border: "1px solid red"},
 };
 
 export class User extends Component {
@@ -81,7 +81,7 @@ export class User extends Component {
   render() {
     return (
       <div>
-          <nav className="navbar fixed-top navbar-expand-md navbar-dark bg-dark" ref="navBar" >
+          <nav className="navbar navbar-expand-md navbar-dark bg-dark" ref="navBar" >
             <button className="navbar-toggler" type="button" 
                     data-toggle="collapse" data-target="#navbarSupportedContent" 
                     aria-controls="navbarSupportedContent" 
