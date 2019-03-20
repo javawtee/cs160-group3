@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-export class Restaurant extends Component { 
+export class RestaurantConsole extends Component { 
   state = { 
   }
   
@@ -25,4 +25,4 @@ export class Restaurant extends Component {
    }
 }
 
-export default Restaurant;
+export default RestaurantConsole;
