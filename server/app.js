@@ -30,25 +30,13 @@ connection.connect((err) => {
   else console.log('Welcome to Express JS. You are connected')
 })
 
-app.post('/uh', function(request, response) {
-  //response.send(request.query.info_option);
-  //response.send(request.query.id);
-  var html = '';
-  html += "<table border='2'><tbody><tr><th>Create Time</th><th>Id</th><th>Tweet Text</th></tr>";
-  
-  html += "</tbody>";
-  html += "</table>";
-  html += "<p><a href=\"/\">Return to main page</a>";
-  response.send(html);
-});
-
-app.post('/testpage', (req, res) => {
+app.post('/login', (req, res) => {
   //var uid = 'tester1'
   //var pw = 'testerpw1'
-  var uid = req.body.userID
+  var uid = req.body.userName
   var pw = req.body.password
-  console.log('SELECT user_name FROM users WHERE user_id =\'' + uid + '\' AND password=\'' + pw + '\'')
-  connection.query('SELECT user_name FROM users WHERE user_id =\'' + uid + '\' AND password=\'' + pw + '\'', (err, rows, fields) => {
+  console.log('SELECT userName FROM users WHERE userId =\'' + uid + '\' AND password=\'' + pw + '\'')
+  connection.query('SELECT userName FROM users WHERE userId =\'' + uid + '\' AND password=\'' + pw + '\'', (err, rows, fields) => {
     if(err) throw err
     else {
       // create a variable to load results
@@ -58,7 +46,7 @@ app.post('/testpage', (req, res) => {
       }
       if(rows.length > 0) {
         payload.numOfResults = rows.length
-        payload.results.push(rows[0].user_name) // expected only 1 property
+        payload.results.push(rows[0].userName) // expected only 1 property
       }
       // else send default initialization of data
       res.json(payload)

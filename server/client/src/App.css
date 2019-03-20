@@ -1,108 +1,45 @@
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-  font-size: 1em;
-  line-height: 1.2;
-}
-
 .App {
-  text-align: center;
-  padding: 0 20vw;
-  color: #000;
-}
+  background: #00B4DB;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #0083B0, #00B4DB);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #0083B0, #00B4DB); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 
-button {
-  text-transform: uppercase;
-  background: #243B55;
-  border-radius: 4px;
-  border: transparent;
-  padding: 2%;
-  margin: 2% 0;
-  color: #fff;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #3887ff;
-  transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms
-}
-
-table{
-  width: 100%;
-  text-align: left;
-}
-
-#home-container {
-  background: #fff;
-  color: blue;
-  vertical-align: middle;
+  padding: 0 25%;
   min-height: 100vh;
-  padding: 1vh 0;
 }
 
-#home-nav{
-  position:fixed;
-  top: 0;
-  width: 60vw;
-  height: 5vh;
-  border: thin solid black;
-  z-index: 1;
+Link, a {
+  text-decoration: none !important;
 }
 
-#home-div {
-  position: relative;
-  width: 60%;
-  margin: 0 20%;
-}
-
-.home-common-div{
-  height: 7vh;
+.navbar-brand, .nav-link {
   cursor: pointer;
-  margin-bottom: 1%;
-  background: #141E30;  /* fallback for old browsers */
-  background: -webkit-linear-gradient(to right, #243B55, #141E30);  /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(to right, #243B55, #141E30); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-  color: #fff;
-  font-size: 2em !important;
 }
 
-.driver-application-form, .login-form, .registration-form{
-  display: none;
-  cursor: auto;
+.App .container {
   background: #fff;
-  color: #141E30;
-  border: thin solid black;
-  height: auto;
-  width: 100%;
-  padding: 3% 5%;
-  font-size: 1.2em !important;
 }
 
-#pw-eye {
-  background-size: cover;
-  width: 3.5vw;
-  z-index: 3;
-  cursor: pointer;
+/* ... used for spans>img in login */
+.input-group-text {
+  width: 3vw;
 }
 
-.tooltip .tooltiptext {
-  visibility: hidden;
-  width: 120px;
-  background-color: black;
-  color: #fff;
+.form-container {
+  padding-top: 15%;
+}
+
+.form-col {
   text-align: center;
-  border-radius: 6px;
-  padding: 2px 0;
-
-  /* Position the tooltip */
-  position: absolute;
-  z-index: 1;
+  padding: 1% 15%;
 }
 
-.show-password-ttt{
-  width: 10vw !important;
-  left: 98%;
+.pw-visibility-toggler {
+  background-size: cover;
+  min-width: 3vw !important;
+}
+
+.input-error {
+  color: red !important;
 }
 
 .tooltip:hover .tooltiptext {
@@ -123,4 +60,8 @@ table{
   color: #fff;
   font-size: 2em !important;
   border-radius:45px;
+.step-col {
+  text-align: center;
+  margin: 1% 0;
+  padding: 2%;
 }

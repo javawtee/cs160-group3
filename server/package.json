@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
+    "server": "nodemon ./bin/www",
     "client": "npm start --prefix client",
-    "dev": "concurrently \"npm start\" \"npm run client\""
+    "dev": "concurrently \"npm run server\" \"npm run client\""
   },
   "dependencies": {
     "concurrently": "^4.1.0",
@@ -16,10 +17,9 @@
     "http-errors": "~1.6.2",
     "jade": "~1.11.0",
     "morgan": "~1.9.0",
-    "mysql": "^2.16.0",
-    "react-router-dom": "^4.3.1"
+    "mysql": "^2.16.0"
   },
   "devDependencies": {
-    "css-loader": "^2.1.1"
+    "nodemon": "^1.18.10"
   }
 }

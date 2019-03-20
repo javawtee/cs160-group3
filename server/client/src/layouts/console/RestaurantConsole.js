@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 
-import '../App.css';
-
-export class Restaurant extends Component { 
+export class RestaurantConsole extends Component { 
   state = { 
     numItems: 1
   }
@@ -55,4 +53,4 @@ export class Restaurant extends Component {
   }
 }
 
-export default Restaurant;
+export default RestaurantConsole;
