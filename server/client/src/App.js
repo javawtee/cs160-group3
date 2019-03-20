@@ -14,6 +14,7 @@ class App extends Component {
 
   render() {
     const { authenticated } = this.state;
+    const {login, register, applyForDriver} = this.state
     return (
       <div className="App" >
         <Switch>
