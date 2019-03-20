@@ -22,21 +22,25 @@ const mysql = require('mysql');
 const connection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  database: 'testdb'
+  password: 'password',
+  database: 'sckflightdatabase'
 })
 
-connection.connect((err) => {
-  if(err) console.log('Welcome to Express JS. You are disconnected')
-  else console.log('Welcome to Express JS. You are connected')
+
+app.get('/', (req, res) => {
+  connection.connect((err) => {
+    if(err) res.send('Welcome to Express JS. You are disconnected')
+    else res.send('Welcome to Express JS. You are connected')
+  })
 })
 
-app.post('/login', (req, res) => {
+
+app.post('/testpage', (req, res) => {
   //var uid = 'tester1'
   //var pw = 'testerpw1'
-  var uid = req.body.userName
+  var uid = req.body.userID
   var pw = req.body.password
-  console.log('SELECT userName FROM users WHERE userId =\'' + uid + '\' AND password=\'' + pw + '\'')
-  connection.query('SELECT userName FROM users WHERE userId =\'' + uid + '\' AND password=\'' + pw + '\'', (err, rows, fields) => {
+   connection.query('SELECT email FROM user WHERE email = ? AND password = ?',[uid, pw], (err, rows, fields) => {
     if(err) throw err
     else {
       // create a variable to load results
@@ -46,30 +50,12 @@ app.post('/login', (req, res) => {
       }
       if(rows.length > 0) {
         payload.numOfResults = rows.length
-        payload.results.push(rows[0].userName) // expected only 1 property
+        payload.results.push(rows[0].email) // expected only 1 property
       }
       // else send default initialization of data
       res.json(payload)
     }
   })
-});
-
-app.post('/add_inventory', (req, res) => {
-  console.log("added to inventory!");
-
-  let name = req.body.itemName;
-  let quantity = req.body.quantity;
-  let addr = req.body.deliveryAddress;
-
-  //replace the sql command below
-  connection.query('' + pw + '\'', (err, rows, fields) => {
-    if(err) throw err
-    else {
-      //you can do some shit with the data 
-      res.json(/* idk, some object */);
-    }
-  });
-
 });
 
 // catch 404 and forward to error handler
