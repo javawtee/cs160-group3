@@ -21,26 +21,23 @@ app.use(express.static(path.join(__dirname, 'public')));
 const mysql = require('mysql');
 const connection = mysql.createConnection({
   host: 'localhost',
-  user: 'root',
   password: 'password',
-  database: 'sckflightdatabase'
+  user: 'root',
+  database: 'testdb'
 })
 
-
-app.get('/', (req, res) => {
-  connection.connect((err) => {
-    if(err) res.send('Welcome to Express JS. You are disconnected')
-    else res.send('Welcome to Express JS. You are connected')
-  })
+connection.connect((err) => {
+  if(err) console.log('Welcome to Express JS. You are disconnected')
+  else console.log('Welcome to Express JS. You are connected')
 })
 
-
-app.post('/testpage', (req, res) => {
+app.post('/login', (req, res) => {
   //var uid = 'tester1'
   //var pw = 'testerpw1'
-  var uid = req.body.userID
+  var uid = req.body.userName
   var pw = req.body.password
-   connection.query('SELECT email FROM user WHERE email = ? AND password = ?',[uid, pw], (err, rows, fields) => {
+  console.log('SELECT name FROM user WHERE userId =\'' + uid + '\' AND password=\'' + pw + '\'')
+  connection.query('SELECT name FROM user WHERE userId =\'' + uid + '\' AND password=\'' + pw + '\'', (err, rows, fields) => {
     if(err) throw err
     else {
       // create a variable to load results
@@ -50,12 +47,73 @@ app.post('/testpage', (req, res) => {
       }
       if(rows.length > 0) {
         payload.numOfResults = rows.length
-        payload.results.push(rows[0].email) // expected only 1 property
+        payload.results.push(rows[0].name) // expected only 1 property
       }
       // else send default initialization of data
       res.json(payload)
     }
   })
+});
+
+app.post('/createAccount/driver', (req, res) => {
+  var userID = req.body.userId
+  var pass = req.body.password
+  var fullName = req.body.firstName + " " + req.body.lastName
+  var phoneNumber = req.body.phoneNumber
+  var email = req.body.email
+  console.log('INSERT INTO user VALUES(?,?,null,null,"driver",?,?,?)'), [userID, pass, fullName, email, phoneNumber]
+  connection.query('INSERT INTO user VALUES(?,?,null,null,"driver",?,?,?)',[userID, pass, fullName, email, phoneNumber],(err, result) => {
+    if(err) throw err
+    else {
+      var payload = {
+        numOfResults : 0,
+      }
+      if(result.affectedRows > 0) {
+        payload.numOfResults = result.affectedRows
+      }
+      res.json(payload)
+    }
+  })
+});
+
+app.post('/createAccount/restaurant', (req, res) => {
+  var userID = req.body.userId
+  var pass = req.body.password
+  var restaurantName = req.body.restaurantName
+  var address = req.body.address
+  var phoneNumber = req.body.phoneNumber
+  var email = req.body.email
+  console.log('INSERT INTO user VALUES(?,?,null,null,"restaurant",?,?,?)'), [userID, pass, restaurantName, email, phoneNumber]
+  connection.query('INSERT INTO user VALUES(?,?,null,null,"restaurant",?,?,?)',[userID, pass, restaurantName, email, phoneNumber],(err, result) => {
+    if(err) throw err
+    else {
+      var payload = {
+        numOfResults : 0,
+      }
+      if(result.affectedRows > 0) {
+        payload.numOfResults = result.affectedRows
+      }
+      res.json(payload)
+    }
+  })
+});
+
+app.post('/add_inventory', (req, res) => {
+  console.log("added to inventory!");
+
+  let name = req.body.itemName;
+  let quantity = req.body.quantity;
+  let addr = req.body.deliveryAddress;
+
+  //replace the sql command below
+  connection.query('' + pw + '\'', (err, rows, fields) => {
+    if(err) throw err
+    else {
+      //you can do some shit with the data 
+      res.json(/* idk, some object */);
+    }
+  });
+
 });
 
 // catch 404 and forward to error handler
