@@ -77,8 +77,6 @@ class App extends Component {
           else {
             return (
               <div id='home-container'>
-                <div>
-                </div>
                 <div id='home-div'>
                   <div className='home-common-div' onClick={() =>this.formClick('apply-for-driver')}>Apply For Driver</div>
                   <div className='driver-application-form home-common-div' style={{display: applyForDriver? 'block': 'none' }}>
@@ -93,13 +91,16 @@ class App extends Component {
                     <RegistrationForm />
                   </div>
                 </div>
+                <p><a href="/restaurant">Link to restaurant test page</a></p>
               </div>
             )
           }
         }}/>
 
-        <Route exact path='/console' component={UserConsole}/>
-        <Route exact path='/restaurant' component={Restaurant}/>
+        <Route path='/console' component={UserConsole}/>
+
+        <Route path='/restaurant' component={Restaurant}/>
+
 
       </div> 
       </BrowserRouter>

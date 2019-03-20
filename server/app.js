@@ -66,6 +66,24 @@ app.post('/testpage', (req, res) => {
   })
 });
 
+app.post('/add_inventory', (req, res) => {
+  console.log("added to inventory!");
+
+  let name = req.body.itemName;
+  let quantity = req.body.quantity;
+  let addr = req.body.deliveryAddress;
+
+  //replace the sql command below
+  connection.query('' + pw + '\'', (err, rows, fields) => {
+    if(err) throw err
+    else {
+      //you can do some shit with the data 
+      res.json(/* idk, some object */);
+    }
+  });
+
+});
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
