@@ -2,15 +2,17 @@ import React, { Component } from 'react'
 
 import RestaurantForm from "./forms/RestaurantForm";
 import DriverForm from "./forms/DriverForm";
+import SignUpSuccess from "./dialog/SignUpSuccess";
 
 export class SignUp extends Component {
     state = {
         currentStep: 1,
         step1Selection: "",
+        signUpSuccess: false,
     }
     handleStep1OnClick = this.handleStep1OnClick.bind(this);
-
-    
+    handleCreatedAccount = this.handleCreatedAccount.bind(this);
+    handleDialogClose = this.handleDialogClose.bind(this);
 
     handleStep1OnClick(e){
         var step1Selection;
@@ -24,12 +26,24 @@ export class SignUp extends Component {
     getStep2Content(){
         if(this.state.currentStep > 1){
             if(this.state.step1Selection === "Restaurant"){
-                return <RestaurantForm />
+                return <RestaurantForm createdAccount={this.handleCreatedAccount}/>
             }
             if(this.state.step1Selection === "Driver") {
-                return <DriverForm />
+                return <DriverForm createdAccount={this.handleCreatedAccount}/>
             }
         }
+    }
+
+    handleCreatedAccount(){
+        this.setState({signUpSuccess: true})
+    }
+
+    handleDialogClose(){
+        this.setState({
+            signUpSuccess: false,
+        },() => {
+            window.location.href="/"
+        });
     }
 
   render() {
@@ -63,6 +77,7 @@ export class SignUp extends Component {
                     </div>
                 </div>
             </div>
+            <SignUpSuccess open={this.state.signUpSuccess} onClose={this.handleDialogClose}/>
         </div> 
     )
   }

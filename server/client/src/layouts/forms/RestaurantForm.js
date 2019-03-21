@@ -12,10 +12,12 @@ export class RestaurantForm extends Component {
     address: "",
     phoneNumber: "",
     email: "",
-    errors: [false, false, false, false, false, false, false]        
+    errors: [false, false, false, false, false, false, false],
+    isDuplicate: false,       
   }
-  handleOnChange = this.handleOnChange.bind(this)
-  handleSubmit = this.handleSubmit.bind(this)
+  handleOnChange = this.handleOnChange.bind(this);
+  handleSubmit = this.handleSubmit.bind(this);
+  validateUserId = this.validateUserId.bind(this);
 
   handleOnChange(e){
     var newErrors = this.state.errors;
@@ -67,29 +69,30 @@ export class RestaurantForm extends Component {
     if(newErrors.filter(error => error === true).length > 0) // has any error, stop submitting
       this.setState({ errors: newErrors });
     else {
-        alert("added");
-        // fetch("/createAccount/restaurant", 
-        //   {
-        //   method: "POST",
-        //   headers: {
-        //     "Accept": "application/json",
-        //     "Content-Type": "application/json"
-        //   },
-        //   body: JSON.stringify({userId, password, restaurantName, address, phoneNumber, email})
-        // })
-        // .then(res => res.json())
-        // .then(payload => {
-        // if(payload.numOfResults === 0)
-        //   alert("Failed. Can't insert to database")
-        // else
-        //   alert("successfully created an account")
-        //}) // whenever setState is called, this component will be re-rendered
+        fetch("/createAccount/restaurant", 
+          {
+          method: "POST",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({userId, password, restaurantName, address, phoneNumber, email})
+        })
+        .then(res => res.json())
+        .then(payload => {
+        if(payload.numOfResults === 0)
+          alert("Failed. Can't insert to database")
+        else{
+          this.setState({
+            userId: "", password: "", confirmPassword: "", restaurantName: "", address: "", phoneNumber: "", email:""
+          }, () => this.props.createdAccount())}
+        }) // whenever setState is called, this component will be re-rendered
       }
     }
 
   toggleError = (inputIndex) => {
     return {
-        borderColor: this.state.errors[inputIndex] ? "red" : "#ced4da",
+      borderColor: this.state.errors[inputIndex] || (inputIndex === 0 && this.state.isDuplicate) ? "red" : "#ced4da",
     }
   }
 
@@ -97,6 +100,24 @@ export class RestaurantForm extends Component {
       return {
           display: this.state.errors[inputIndex] ? "block" : "none",
       }
+  }
+
+  validateUserId(e){
+    e.preventDefault();
+    const {userId} = this.state
+    fetch("/isUserId/duplicate", 
+    {
+        method: "POST",
+        headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+        },
+        body: JSON.stringify({userId})
+    })
+    .then(res => res.json())
+    .then(payload => {
+        this.setState({isDuplicate: payload.numOfResults > 0}); // > 0 ==> duplicate ==> true
+    })
   }
 
   render() {
@@ -107,9 +128,12 @@ export class RestaurantForm extends Component {
                 <div className="col">
                     <label>User ID:</label>
                     <input style={this.toggleError(0)} type="text" className="form-control" name="userId" autoFocus
-                            value={this.state.userId} onChange={this.handleOnChange}/>
+                            value={this.state.userId} onChange={this.handleOnChange} onBlur={this.validateUserId}/>
                     <small style={this.toggleTextError(0)} className="input-error form-text text-muted">
                       Min: 6, max: 20 characters or the format is not regconized (no space or !@#$%^&*)
+                    </small>
+                    <small style={{display: this.state.isDuplicate? "block" : "none"}} className="input-error form-text text-muted">
+                          User ID is taken. Try another
                     </small><br/>
 
                     <label>Password:</label>
