@@ -21,7 +21,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 const mysql = require('mysql');
 const connection = mysql.createConnection({
   host: 'localhost',
-  password: 'password',
   user: 'root',
   database: 'testdb'
 })
@@ -36,65 +35,59 @@ app.post('/login', (req, res) => {
   //var pw = 'testerpw1'
   var uid = req.body.userName
   var pw = req.body.password
-  console.log('SELECT name FROM user WHERE userId =\'' + uid + '\' AND password=\'' + pw + '\'')
-  connection.query('SELECT name FROM user WHERE userId =\'' + uid + '\' AND password=\'' + pw + '\'', (err, rows, fields) => {
+  connection.query('SELECT userName FROM users WHERE userId=? AND password=?',[uid, pw] , (err, rows) => {
     if(err) throw err
     else {
       // create a variable to load results
       var payload = {
-        numOfResults : 0,
+        numOfResults : rows.length,
         results: []
       }
       if(rows.length > 0) {
-        payload.numOfResults = rows.length
-        payload.results.push(rows[0].name) // expected only 1 property
+        payload.results.push(rows[0].userName) // expected only 1 property
       }
       // else send default initialization of data
-      res.json(payload)
+      res.json(payload);
     }
   })
 });
 
-app.post('/createAccount/driver', (req, res) => {
-  var userID = req.body.userId
-  var pass = req.body.password
-  var fullName = req.body.firstName + " " + req.body.lastName
-  var phoneNumber = req.body.phoneNumber
-  var email = req.body.email
-  console.log('INSERT INTO user VALUES(?,?,null,null,"driver",?,?,?)'), [userID, pass, fullName, email, phoneNumber]
-  connection.query('INSERT INTO user VALUES(?,?,null,null,"driver",?,?,?)',[userID, pass, fullName, email, phoneNumber],(err, result) => {
-    if(err) throw err
-    else {
-      var payload = {
-        numOfResults : 0,
-      }
-      if(result.affectedRows > 0) {
-        payload.numOfResults = result.affectedRows
-      }
-      res.json(payload)
-    }
+app.post('/isUserId/duplicate', (req, res) => {
+  const userId = req.body.userId;
+  connection.query('SELECT * FROM users WHERE userId=?', [userId], (err, rows) => {
+        if(err) throw err
+        else {
+          var payload = {
+            numOfResults : rows.length,
+          }
+          res.json(payload);
+        }
   })
-});
+})
 
-app.post('/createAccount/restaurant', (req, res) => {
-  var userID = req.body.userId
-  var pass = req.body.password
-  var restaurantName = req.body.restaurantName
-  var address = req.body.address
-  var phoneNumber = req.body.phoneNumber
-  var email = req.body.email
-  console.log('INSERT INTO user VALUES(?,?,null,null,"restaurant",?,?,?)'), [userID, pass, restaurantName, email, phoneNumber]
-  connection.query('INSERT INTO user VALUES(?,?,null,null,"restaurant",?,?,?)',[userID, pass, restaurantName, email, phoneNumber],(err, result) => {
-    if(err) throw err
-    else {
-      var payload = {
-        numOfResults : 0,
-      }
-      if(result.affectedRows > 0) {
-        payload.numOfResults = result.affectedRows
-      }
-      res.json(payload)
-    }
+app.post('/createAccount/:userType', (req, res) => {
+  const userType = req.params.userType;
+  const userID = req.body.userId;
+  const pw = req.body.password;
+  const name = userType === "driver" ? req.body.firstName + " " + req.body.lastName : req.body.restaurantName;
+  const address = userType === "driver" ? null : req.body.address;
+  const phoneNumber = req.body.phoneNumber;
+  const email = req.body.email;
+  //console.log('INSERT INTO users(userId, password, userName, userType, address, phoneNumber, email)' + 
+                         //'VALUES(?,?,?,?,?,?,?,?)'), [userID, pw, name, userType, address, phoneNumber, email]
+  connection.query('INSERT INTO users(userId, password, userName, userType, address, phoneNumber, email)' + 
+                              'VALUES(?,?,?,?,?,?,?)', [userID, pw, name, userType, address, phoneNumber, email],
+    (err, result) => {
+        if(err) throw err
+        else {
+          var payload = {
+            numOfResults : 0,
+          }
+          if(result.affectedRows > 0) {
+            payload.numOfResults = result.affectedRows
+          }
+          res.json(payload)
+        }
   })
 });
 
