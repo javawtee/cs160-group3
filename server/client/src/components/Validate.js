@@ -14,7 +14,7 @@ import zxcvbn from "zxcvbn";
   4 # very unguessable: strong protection from offline slow-hash scenario. (guesses >= 10^10)
 */
 
-const userIdRegex = /^([a-zA-Z0-9]([_-]?[a-zA-Z0-9_-]){0,4}[a-zA-Z0-9]{0,14})$/; // min 6 characters, max 20; no space or special characters, but _ and -
+const userIdRegex = /^([A-z])+((-|_)*[A-z0-9]*)$/; // no space or special characters, but _ and -
 
 const emailRegex = 	
 /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -27,7 +27,7 @@ class Validate {
   }
 
   validUserId = (value) => {
-    return this.notEmpty(value) && userIdRegex.test(value);
+    return value.length > 5 && value.length < 20;
   }
 
   validPassword = (value) => {

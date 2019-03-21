@@ -51,3 +51,9 @@ Link, a {
   margin: 1% 0;
   padding: 2%;
 }
+
+/* avoid scroll in dialog */
+.MuiDialog-paper-5, .MuiDialog-paper-40{
+  overflow-y: unset !important;
+}
+
