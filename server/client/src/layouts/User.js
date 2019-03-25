@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import {Link} from "react-router-dom";
 import Auth from "../components/Auth";
 import DriverConsole from "./console/DriverConsole";
+import RestaurantConsole from "./console/RestaurantConsole";
 
 const styles = {
   home: { border: "1px solid red"},
@@ -79,6 +80,7 @@ export class User extends Component {
     }))
   }
   render() {
+    const { userName, userType, address, phoneNumber, email, approvedDate} = JSON.parse(sessionStorage.getItem("user-token"));
     return (
       <div>
           <nav className="navbar navbar-expand-md navbar-dark bg-dark" ref="navBar" >
@@ -118,12 +120,14 @@ export class User extends Component {
             </div>
         </nav>
         <div className="container">
-          <div className="row" style={styles.home} ref={this.console}><DriverConsole /></div>
+          <div className="row" style={styles.home} ref={this.console}>
+            {userType === "driver" ? <DriverConsole /> : <RestaurantConsole />}
+          </div>
           <div className="row" style={styles.home} ref={this.profile}>
             <div className="col">
-              Name: {JSON.parse(sessionStorage.getItem("user-token")).userName}
+              Name: {userName}
               <div>
-                <a href="/changePassword" onClick={this.toggleChangePassword}>Change password</a>
+                <a href="user/changePassword" onClick={this.toggleChangePassword}>Change password</a>
                 <div style={{display: this.state.changePassword? "block": "none"}}>
                   <label>Old password:</label><br/>
                   <input type="password" name="oldPassword" value={this.state.oldPassword}
@@ -140,7 +144,10 @@ export class User extends Component {
             </div>
             <div className="w-100"></div>
             <div className="col">
-              Phone number, address, etc.
+              Joined date: {approvedDate} <br/>
+              Phone number: {phoneNumber} <br/>
+              Email: {email} <br/>
+              {address !== null ? "Address: " + address : ""}
             </div>
           </div>
           <div className="row" style={styles.home} ref={this.history}>History</div> {/*Bills, Payments*/}
