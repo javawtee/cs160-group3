@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>ADMIN PAGE</title>
+</head>
+<body>
+    <table>
+        <tr>
+            <th>#</th>
+            <th>Submitted Time</th>
+            <th>User Type</th>
+            <th>User ID</th>
+            <th>User Name</th>
+            <th>Address (if available)</th>
+            <th>Phone Numbers</th>
+            <th>Email</th>
+            <th>Approved?</th>
+        </tr>
+        <%
+            listOfUsers.map((row, i) => { %>
+                <tr>
+                    <td><%= i %></td>
+                    <td><%= new Date(row.submittedDate).toLocaleString("en-US") %></td>
+                    <td><%= row.userType %></td>
+                    <td><%= row.userId %></td>
+                    <td><%= row.userName %></td>
+                    <td><%= row.address %></td>
+                    <td><%= row.phoneNumber %></td>
+                    <td><%= row.email %></td>
+                    <td><% if(row.approved === 0) { %>
+                            <button>Approve</button>
+                        <% } else { %>
+                            <label>Approved</label>
+                        <% } %></td>
+                </tr>
+            <% })
+        %>
+    </table>
+</body>
+</html>

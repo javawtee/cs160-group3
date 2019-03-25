@@ -17,7 +17,7 @@ export class LoginForm extends Component {
       e.preventDefault();
       const {userName, password} = this.state;
       if(userName !== "" && password !== ""){
-          fetch("/login", 
+          fetch("/user/login", 
             {
             method: "POST",
             headers: {
@@ -31,7 +31,6 @@ export class LoginForm extends Component {
             if(payload.numOfResults === 0)
               alert("Username or Password is incorrect");
             else {
-              alert("successfully logged in");
               Auth.login(this.state.saveLocal, payload.results[0]); // create session
               this.props.switchToConsole(); // passing to HomePage
             }
