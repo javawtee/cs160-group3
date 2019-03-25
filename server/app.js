@@ -24,6 +24,9 @@ app.get("/", (req,res) => {
   .then(listOfUsers => res.render("admin", {listOfUsers}));
 })
 
+// get any url start with /user and match the router.get/post/..whatever
+app.use("/user", require("./api/user"));
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
