@@ -50,7 +50,7 @@ export class RestaurantForm extends Component {
 
   handleSubmit(e){
     e.preventDefault();
-    const {userId, password, confirmPassword, restaurantName, address, phoneNumber, email} = this.state
+    const {userId, password, confirmPassword, restaurantName, address, phoneNumber, email, isDuplicate} = this.state
     var newErrors = this.state.errors; // by using clone ==> avoid state mutation in React-pattern
     newErrors[0] = !Validate.validUserId(userId); // true: notEmpty ==> newErrors[0] = false
 
@@ -66,10 +66,10 @@ export class RestaurantForm extends Component {
 
     newErrors[6] = !Validate.validEmailFormat(email); // true: valid ==> newErrors[6] = false
 
-    if(newErrors.filter(error => error === true).length > 0) // has any error, stop submitting
+    if((newErrors.filter(error => error === true).length > 0) || isDuplicate) // has any error, stop submitting
       this.setState({ errors: newErrors });
     else {
-        fetch("/createAccount/restaurant", 
+        fetch("/user/sign-up/restaurant", 
           {
           method: "POST",
           headers: {
@@ -105,15 +105,7 @@ export class RestaurantForm extends Component {
   validateUserId(e){
     e.preventDefault();
     const {userId} = this.state
-    fetch("/isUserId/duplicate", 
-    {
-        method: "POST",
-        headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/json"
-        },
-        body: JSON.stringify({userId})
-    })
+    fetch("/user/isDuplicate/" + userId)
     .then(res => res.json())
     .then(payload => {
         this.setState({isDuplicate: payload.numOfResults > 0}); // > 0 ==> duplicate ==> true
