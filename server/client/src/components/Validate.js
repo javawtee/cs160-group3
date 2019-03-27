@@ -27,7 +27,7 @@ class Validate {
   }
 
   validUserId = (value) => {
-    return value.length > 5 && value.length < 20;
+    return value.length > 5 && value.length < 20 && userIdRegex.test(value);
   }
 
   validPassword = (value) => {

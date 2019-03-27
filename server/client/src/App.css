@@ -7,6 +7,10 @@
   min-height: 100vh;
 }
 
+hr {
+  background-color: #04327a;
+}
+
 Link, a {
   text-decoration: none !important;
 }
@@ -57,3 +61,12 @@ Link, a {
   overflow-y: unset !important;
 }
 
+.editable-tr{
+  background: #a4a5aa;
+  color: #000;
+  padding: 10% 0 10% 10%;
+}
+
+td input{
+  width: 40%;
+}
