@@ -3,7 +3,7 @@ const router = express.Router();
 const connection = require("./connector");
 
 router.post('/login', (req, res) => {
-    var uid = req.body.userName
+    var uid = req.body.userId
     var pw = req.body.password
     connection.query("SELECT userId,userName,userType,address,phoneNumber,email,approvedDate FROM users" +  
                           " WHERE userId=? AND password=? AND approved=1",[uid, pw] , (err, rows) => {
@@ -31,11 +31,10 @@ router.post('/login', (req, res) => {
     })
 });
 
-router.get('/isDuplicate/:userId', (req, res) => {
+router.get('/exists/:userId', (req, res) => {
   const userId = req.params.userId;
-  console.log("ASDF " + userId)
   if(userId !== undefined){
-    connection.query("SELECT * FROM users WHERE userId=?", [userId], (err, rows) => {
+    connection.query("SELECT email FROM users WHERE userId=?", [userId], (err, rows) => {
           if(err) throw err
           else {
             var payload = {

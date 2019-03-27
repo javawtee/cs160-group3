@@ -57,7 +57,7 @@ Link, a {
 }
 
 /* avoid scroll in dialog */
-.MuiDialog-paper-5, .MuiDialog-paper-40{
+.MuiDialog-paper-5, .MuiDialog-paper-40, .MuiDialog-paper-33{
   overflow-y: unset !important;
 }
 
