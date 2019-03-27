@@ -1,0 +1,50 @@
+Public class user{
+	Float lat;
+	Float long;
+	String id;
+	String username;
+	String password;
+	String type;
+
+	Public user(
+		string username, string password){this.username=username; 
+		this.password=password;
+		id=database.size;
+		type=null;
+	}
+	Public void getLat(){return lat;}
+	Public void getLong(){return long;}
+	Public void getID(){return id;}
+	Public void getUsername(){return username;}
+	Public void getPassword(){return password;}
+	Public void getType(){return type;}
+	Public void updateLocation(){
+		lat=googleMapsAPI.getLastKnownLocation.lat;
+		long=googleMapsAPI.getLastKnownLocation.long;
+	}
+}
+
+Public class restaurant extends user{
+	arrayList orders
+	Public restaurant(string username,string password){
+		super(username, password);
+		type=restaurant;
+	}
+	Public void order(string order){
+		orders.add(order);
+		//database operation
+	}
+}
+
+Public class driver extends user{
+	String currentOrder
+	Public driver(string username, string password){
+		super(username, password);
+		type=driver;
+	}
+	Public void getCurrentOrder(){
+		Return currentOrder;
+		//database operation
+	}
+	Public void setCurrentJob(String order){currentOrder=order;}
+}
