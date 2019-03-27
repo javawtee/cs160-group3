@@ -25,10 +25,11 @@ class Auth {
 }
 
 function getToken(userInfo){
-    const { userName, userType, address, phoneNumber, email, approvedDate} = userInfo;
+    const { userId, userName, userType, address, phoneNumber, email, approvedDate} = userInfo;
     const NAMESPACE = "45e669ee-e736-4354-9efc-e1d620b18c69"; // random UUID
     var aToken = JSON.stringify({
         uuid: uuid5(userName, NAMESPACE),
+        userId,
         userName,
         userType,
         address,

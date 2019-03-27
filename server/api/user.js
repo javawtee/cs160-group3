@@ -5,7 +5,7 @@ const connection = require("./connector");
 router.post('/login', (req, res) => {
     var uid = req.body.userName
     var pw = req.body.password
-    connection.query("SELECT userName,userType,address,phoneNumber,email,approvedDate FROM users" +  
+    connection.query("SELECT userId,userName,userType,address,phoneNumber,email,approvedDate FROM users" +  
                           " WHERE userId=? AND password=? AND approved=1",[uid, pw] , (err, rows) => {
       if(err) throw err
       else {
@@ -16,13 +16,14 @@ router.post('/login', (req, res) => {
         }
         if(rows.length > 0) {
           payload.results.push({
+            userId: rows[0].userId,
             userName: rows[0].userName,
             userType: rows[0].userType,
             address: rows[0].address,
             phoneNumber: rows[0].phoneNumber,
             email: rows[0].email,
             approvedDate: rows[0].approvedDate
-          }) // expected only 1 property
+          })
         }
         // else send default initialization of data
         res.json(payload);
@@ -31,16 +32,19 @@ router.post('/login', (req, res) => {
 });
 
 router.get('/isDuplicate/:userId', (req, res) => {
-  const userID = req.params.userId;
-  connection.query("SELECT * FROM users WHERE userId=?", [userID], (err, rows) => {
-        if(err) throw err
-        else {
-          var payload = {
-            numOfResults : rows.length,
+  const userId = req.params.userId;
+  console.log("ASDF " + userId)
+  if(userId !== undefined){
+    connection.query("SELECT * FROM users WHERE userId=?", [userId], (err, rows) => {
+          if(err) throw err
+          else {
+            var payload = {
+              numOfResults : rows.length,
+            }
+            res.json(payload);
           }
-          res.json(payload);
-        }
-  })
+    })
+  }
 })
 
 router.post('/sign-up/:userType', (req, res) => {
@@ -71,23 +75,32 @@ router.post('/sign-up/:userType', (req, res) => {
 });
 
 // not test yet
-router.post("/changePassword", (req,res) => {
-  const userID = req.body.userId;
-  const oldPassword = req.body.oldPassword;
-  const newPassword = req.body.newPassword;
-  connection.query('UPDATE users SET password=? WHERE userId=? AND password=?',[userID, newPassword, oldPassword],
-    (err, result) => {
-        if(err) throw err
-        else {
-          var payload = {
-            numOfResults : 0,
-          }
-          if(result.affectedRows > 0) {
-            payload.numOfResults = result.affectedRows
-          }
-          res.json(payload)
+router.post("/edit-information", (req,res) => {
+  const {userId, oldPassword, newPassword, phoneNumber, email, address} = req.body;
+  if(newPassword === undefined ){
+    connection.query("SELECT userId from users WHERE userId=? AND password=?", [userId, oldPassword], (err, rows) => {
+      if(err) throw err
+      else {
+        var payload = {
+          numOfResults : rows.length,
         }
-  })
+        res.json(payload);
+      }
+    })
+  }
+  if(phoneNumber !== undefined || email !== undefined || address !== undefined){
+    connection.query("UPDATE users SET phoneNumber=?, email=?, address=?  " +
+      "WHERE userId=? AND password=?",[phoneNumber, email, address, userId, oldPassword],
+    (err, result) => {
+      if(err) throw err
+      else {
+        var payload = {
+          numOfResults : result.affectedRows,
+        }
+        res.json(payload)
+      }
+    })
+  }
 })
 
 module.exports = router;

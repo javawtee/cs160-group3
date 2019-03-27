@@ -105,11 +105,13 @@ export class DriverForm extends Component {
     validateUserId(e){
         e.preventDefault();
         const {userId} = this.state
-        fetch("/user/isDuplicate/" + userId)
-        .then(res => res.json())
-        .then(payload => {
-            this.setState({isDuplicate: payload.numOfResults > 0}); // > 0 ==> duplicate ==> true
-        })
+        if(userId.length > 5){ // not validate if user is undecided for user Id
+            fetch("/user/isDuplicate/" + userId)
+            .then(res => res.json())
+            .then(payload => {
+                this.setState({isDuplicate: payload.numOfResults > 0}); // > 0 ==> duplicate ==> true
+            })
+        }
     }
 
   render() {
