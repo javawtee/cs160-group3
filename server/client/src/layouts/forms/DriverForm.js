@@ -106,7 +106,7 @@ export class DriverForm extends Component {
         e.preventDefault();
         const {userId} = this.state
         if(userId.length > 5){ // not validate if user is undecided for user Id
-            fetch("/user/isDuplicate/" + userId)
+            fetch("/user/exists/" + userId)
             .then(res => res.json())
             .then(payload => {
                 this.setState({isDuplicate: payload.numOfResults > 0}); // > 0 ==> duplicate ==> true

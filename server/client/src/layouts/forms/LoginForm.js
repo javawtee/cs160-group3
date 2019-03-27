@@ -1,22 +1,25 @@
 import React, { Component } from 'react'
 import Auth from "../../components/Auth";
-
+import ForgotPassword from "../dialog/ForgotPassword";
 import { Checkbox } from '@material-ui/core';
 
 export class LoginForm extends Component {
     constructor(props){
       super(props);
       this.state = {    
-        userName: '',
+        userId: '',
         password: '',
         saveLocal: false,
+        forgotPassword: false
       };
     }
+    handleOpenForgotPassword = this.handleOpenForgotPassword.bind(this);
+    handleDialogClose = this.handleDialogClose.bind(this);
 
     onLogin = (e) => {
       e.preventDefault();
-      const {userName, password} = this.state;
-      if(userName !== "" && password !== ""){
+      const {userId, password} = this.state;
+      if(userId !== "" && password !== ""){
           fetch("/user/login", 
             {
             method: "POST",
@@ -24,27 +27,33 @@ export class LoginForm extends Component {
               "Accept": "application/json",
               "Content-Type": "application/json"
             },
-            body: JSON.stringify({userName, password})
+            body: JSON.stringify({userId, password})
           })
           .then(res => res.json())
           .then(payload => {
             if(payload.numOfResults === 0)
-              alert("Username or Password is incorrect");
+              alert("UserID or Password is incorrect");
             else {
               Auth.login(this.state.saveLocal, payload.results[0]); // create session
               this.props.switchToConsole(); // passing to HomePage
             }
-            //this.setState({session_username: payload.results[0]})
-              //this.setState({userName: payload.results[0]}) //should redirect to UserConsole here
           }) // whenever setState is called, this component will be re-rendered
       } else 
-          alert("Username or Password cannot be empty")
+          alert("UserID or Password cannot be empty")
     }
 
     handleOnChange = (e) => {
         this.setState({[e.target.name]:e.target.value})
     }
 
+    handleOpenForgotPassword(e){
+      e.preventDefault();
+      this.setState({forgotPassword: true})
+    }
+
+    handleDialogClose(){
+      this.setState({forgotPassword: false})
+    }
   render() {
     return (
       <div>
@@ -58,8 +67,8 @@ export class LoginForm extends Component {
                       <img src="/media/user-ico.png" alt="" width="100%"/>
                     </span>
                   </div>
-                  <input type="text" className="form-control" placeholder="Username" name="userName"
-                          value={this.state.userName} onChange={this.handleOnChange} autoFocus autoComplete='off'/>
+                  <input type="text" className="form-control" placeholder="UserID" name="userId"
+                          value={this.state.userId} onChange={this.handleOnChange} autoFocus autoComplete='off'/>
                 </div>
               </div>
 
@@ -80,7 +89,7 @@ export class LoginForm extends Component {
               <div className="w-100"></div>
               <div className="col">
                 <Checkbox onChange={() => this.setState({saveLocal: true})}/> Save password<br/>
-                <a href='aDialog' onClick={()=>alert('building...')}>Forgot password?</a><br/><br/>
+                <a href='/forgot-password' onClick={this.handleOpenForgotPassword}>Forgot password?</a><br/><br/>
               </div>
 
               <div className="w-100"></div>
@@ -90,6 +99,7 @@ export class LoginForm extends Component {
             </div>
           </div>
         </form>
+        <ForgotPassword open={this.state.forgotPassword} onClose={this.handleDialogClose} />
       </div>
     )
   }
