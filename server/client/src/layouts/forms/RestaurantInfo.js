@@ -3,42 +3,36 @@ import {Link} from "react-router-dom";
 import RestaurantOverview from "./RestaurantOverview";
 import RestaurantMenu from "./RestaurantMenu";
 
+import RestaurantForm from "./RestaurantForm";
+import DriverForm from "./DriverForm";
+import SignUpSuccess from "../dialog/SignUpSuccess";
+
 export class RestaurantInfo extends Component { 
-  state = { 
-    numItems: 1,
-    currentContent: ""
-  }
-  componentWillMount(){
-        const currentContent = this.props.content;
-        this.setState({currentContent});
-    }
-    
-    componentDidMount(){
-        this.setState({navBarHeight: this.refs.navBar.clientHeight});
-    }
-
-  increaseItemCount = () => {
-    this.setState({
-      numItems: this.state.numItems + 1
-    });  
+  state = {
+            numItems: 1,
+            currentContent: "",
+            navBarHeight: 0,
   }
 
-  renderItemFields = () => {
-    let fields = [];
+  handleStep1OnClick = this.handleStep1OnClick.bind(this);
+  handleCreatedAccount = this.handleCreatedAccount.bind(this);
+  handleDialogClose = this.handleDialogClose.bind(this);
 
-    for (let i = 0; i < this.state.numItems; i++) {
-      fields.push( 
-        <form id='form'>     
-          <input className='input' type="text"   
-          placeholder="Item name"/>
-          
-        </form>
-      )
-    }
+  const styles = {
+    home: { border: "1px solid red"},
+  };
 
-    return fields;
+  displayOverview = () => {
+    this.setState({currentContent:"Overview"});
+    {this.getContent()};
   }
-  getContent(){
+
+  displayMenu = () => {
+    this.setState({currentContent:"Menu"});
+    {this.getContent()};
+  }
+
+  getContent = () => {
         switch(this.state.currentContent){
             case "Overview":
                 return <RestaurantOverview />
@@ -48,49 +42,77 @@ export class RestaurantInfo extends Component {
                 return <div>CONTENT NOT FOUND</div>
         }
     }
+
+  handleStep1OnClick(e){
+        var step1Selection;
+        if(e.target.name === "overview")
+            step1Selection = "Overview";
+        else 
+            step1Selection = "Menu";
+        this.setState({currentStep: 2, step1Selection});
+    }
+
+    getStep2Content(){
+        if(this.state.currentStep > 1){
+            if(this.state.step1Selection === "Overview"){
+                return <RestaurantOverview />
+            }
+            if(this.state.step1Selection === "Menu") {
+                return <RestaurantMenu />
+            }
+        }
+    }
+
+    handleCreatedAccount(){
+        this.setState({signUpSuccess: true})
+    }
+
+    handleDialogClose(){
+        this.setState({
+            signUpSuccess: false,
+        },() => {
+            window.location.href="/"
+        });
+    }
   
   render () {  
   const {currentContent} = this.state;                                  
     return (
       <div>
-        <nav className="navbar navbar-expand-md navbar-dark bg-dark" ref="navBar" >
-              <button className="navbar-toggler" type="button" 
-                      data-toggle="collapse" data-target="#navbarSupportedContent" 
-                      aria-controls="navbarSupportedContent" 
-                      aria-expanded="false" 
-                      aria-label="Toggle navigation">
-              <span className="navbar-toggler-icon"></span>
-              </button>
+        
 
-              <div className="collapse navbar-collapse" id="navbarSupportedContent">
-              <ul className="navbar-nav mr-auto">
-                  <li>
-                      <Link className={currentContent === "Overview" ? "nav-item active" : "nav-item"} to="/">
-                          <div className="nav-link">Overview</div>
-                      </Link>
-                  </li>
-                  <li>
-                      <Link className={currentContent === "Menu" ? "nav-item active" : "nav-item"} to="/">
-                          <div className="nav-link">Menu</div>
-                      </Link>
-                  </li>
+        <p></p>
+
+        <div className="row" style={{textAlign: "left", padding: "0 5%", marginTop: "10%", fontSize: "0.8vw", lineHeight: "0.8"}}>
+            <div className="col">
+                <div className="row">
+                    <div className="step-col col border bg-light"><h6>Restaurant Name</h6></div>       
+                </div>
+                <nav className="navbar navbar-expand-md navbar-dark bg-dark" ref="navBar" >
+                  <div className="collapse navbar-collapse" id="navbarSupportedContent">
+                  <ul className="navbar-nav mr-auto">
+                      <li>                       
+                              <button className="nav-link" name="overview" onClick={this.handleStep1OnClick}>Overview</button>                      
+                      </li>
+                      <li>              
+                              <button className="nav-link" name="menu" onClick={this.handleStep1OnClick}>Menu</button>
+                      </li>
+
+                  </ul>
+                  </div>
+                </nav>
+                <div className="row">
                   
-              </ul>
-              </div>
-          </nav>
-       
-     
-            
-        <p>Overview</p>
-        
+                    <div className="w-100"></div>
+                    <div className="col" style={{padding: "2% 0", marginTop: "5%"}}>
+                        {this.getStep2Content()}
+                    </div>
+                </div>
+            </div>
+            <SignUpSuccess open={this.state.signUpSuccess} onClose={this.handleDialogClose}/>
+        </div> 
 
-        {this.renderItemFields()}
 
-        
-        <button id='addItem' onClick={this.increaseItemCount}>Add Item</button>
-        <button id='submit'>Place orders</button>
-         
- 
       </div>
       )
   }
