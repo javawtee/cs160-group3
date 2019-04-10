@@ -81,8 +81,7 @@ export class RestaurantInfo extends Component {
   const {currentContent} = this.state;                                  
     return (
       <div>
-        
-
+    
         <p></p>
 
         <div className="row" style={{textAlign: "left", padding: "0 5%", marginTop: "10%", fontSize: "0.8vw", lineHeight: "0.8"}}>
@@ -106,7 +105,7 @@ export class RestaurantInfo extends Component {
                 <div className="row">
                   
                     <div className="w-100"></div>
-                    <div className="col" style={{padding: "2% 0", marginTop: "5%"}}>
+                    <div className="col" style={{padding: "2% 0", marginTop: "0%", marginLeft: "5%"}}>
                         {this.getStep2Content()}
                     </div>
                 </div>
