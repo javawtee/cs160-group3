@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
+import RestaurantInfo from "../forms/RestaurantInfo";
 
 export class RestaurantConsole extends Component { 
   state = { 
     numItems: 1
   }
+
+
 
   increaseItemCount = () => {
     this.setState({
@@ -45,7 +48,11 @@ export class RestaurantConsole extends Component {
 
             
             <button id='addItem' onClick={this.increaseItemCount}>Add Item</button>
-            <button id='submit'>Place order</button>
+            <button id='submit'>Place orders</button>
+
+            <RestaurantInfo />
+         
+
           </div>
         </div>
       </div>

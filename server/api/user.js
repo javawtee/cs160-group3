@@ -6,7 +6,7 @@ router.post('/login', (req, res) => {
     var uid = req.body.userId
     var pw = req.body.password
     connection.query("SELECT userId,userName,userType,address,phoneNumber,email,approvedDate FROM users" +  
-                          " WHERE userId=? AND password=? AND approved=1",[uid, pw] , (err, rows) => {
+                          " WHERE userId=? AND password=?",[uid, pw] , (err, rows) => {
       if(err) throw err
       else {
         // create a variable to load results
