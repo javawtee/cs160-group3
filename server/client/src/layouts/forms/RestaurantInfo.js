@@ -7,6 +7,10 @@ import RestaurantForm from "./RestaurantForm";
 import DriverForm from "./DriverForm";
 import SignUpSuccess from "../dialog/SignUpSuccess";
 
+const styles = {
+    navItem: { border: "0px", color: "white", background:"#343A40"},
+};
+
 export class RestaurantInfo extends Component { 
   state = {
             numItems: 1,
@@ -18,9 +22,7 @@ export class RestaurantInfo extends Component {
   handleCreatedAccount = this.handleCreatedAccount.bind(this);
   handleDialogClose = this.handleDialogClose.bind(this);
 
-  const styles = {
-    home: { border: "1px solid red"},
-  };
+  
 
   displayOverview = () => {
     this.setState({currentContent:"Overview"});
@@ -86,16 +88,16 @@ export class RestaurantInfo extends Component {
         <div className="row" style={{textAlign: "left", padding: "0 5%", marginTop: "10%", fontSize: "0.8vw", lineHeight: "0.8"}}>
             <div className="col">
                 <div className="row">
-                    <div className="step-col col border bg-light"><h6>Restaurant Name</h6></div>       
+                    <div className="step-col col border bg-light"><h6>McDonald's</h6></div>       
                 </div>
                 <nav className="navbar navbar-expand-md navbar-dark bg-dark" ref="navBar" >
                   <div className="collapse navbar-collapse" id="navbarSupportedContent">
                   <ul className="navbar-nav mr-auto">
                       <li>                       
-                              <button className="nav-link" name="overview" onClick={this.handleStep1OnClick}>Overview</button>                      
+                          <button className="nav-link" name="overview" onClick={this.handleStep1OnClick} style={styles.navItem}>Overview</button>                      
                       </li>
                       <li>              
-                              <button className="nav-link" name="menu" onClick={this.handleStep1OnClick}>Menu</button>
+                          <button className="nav-link" name="menu" onClick={this.handleStep1OnClick} style={styles.navItem}>Menu</button>
                       </li>
 
                   </ul>
