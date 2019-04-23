@@ -49,7 +49,7 @@ export class User extends Component {
             {userType === "driver" ? <DriverConsole /> : <RestaurantConsole />}
           </div>
           <div className="row" style={styles.home}>
-            <UserInformation />
+            {/*<UserInformation />*/}
           </div>
           <div className="row" style={styles.home}>History</div> {/*Bills, Payments*/}
         </div>

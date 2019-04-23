@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import RestaurantInfo from "../forms/RestaurantInfo";
+import MapContainer from "../MapContainer";
 
 export class RestaurantConsole extends Component { 
   state = { 
@@ -40,7 +41,7 @@ export class RestaurantConsole extends Component {
       <div>
         <div>
           <div id='restaurantContainer'>
-            <div id='home-common-div'>
+            {/*<div id='home-common-div'>
               <p>This is the restaurant view</p>
             </div>
 
@@ -48,9 +49,13 @@ export class RestaurantConsole extends Component {
 
             
             <button id='addItem' onClick={this.increaseItemCount}>Add Item</button>
-            <button id='submit'>Place orders</button>
+            <button id='submit'>Place orders</button>*/}
 
             <RestaurantInfo />
+
+            <MapContainer />
+
+
          
 
           </div>

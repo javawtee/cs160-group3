@@ -5,9 +5,33 @@ const styles = {
 };
 
 export class RestaurantOverview extends Component { 
-  state = { 
-    
+  constructor(props) {
+    super(props);
+    this.showTime = this.showTime.bind(this);
+    this.showAllTime = this.showAllTime.bind(this);
+    this.state= {clicked: true}
   }
+
+
+
+  showTime = () => {
+    return <p>Monday 8:00am - 9:00 pm</p> 
+  }
+
+  showAllTime = () => {
+    return (
+      <>
+      <p>Sunday 10:00am - 9:00 pm</p>
+      <p>Monday 8:00am - 9:00 pm</p> 
+      <p>Tuesday 10:00am - 9:00 pm</p>
+      <p>Wednesday 10:00am - 9:00 pm</p>
+      <p>Thursday 10:00am - 9:00 pm</p>
+      <p>Friday 10:00am - 9:00 pm</p>
+      <p>Saturday 10:00am - 9:00 pm</p>
+      </>
+    );
+  }
+
 
 
   render () {                                    
@@ -16,10 +40,23 @@ export class RestaurantOverview extends Component {
         <p>Classic, long-running fast-food chain known for its burgers, fries & shakes.</p>
         <p>Late-night food · Breakfast · Quick bite</p><br/>
         <p><img src="http://www.sclance.com/pngs/location-symbol-png/./location_symbol_png_811020.png" width="20" height="20" />
-          2850 Augustine Dr, Santa Clara, CA 95054
+           2850 Augustine Dr, Santa Clara, CA 95054
         </p>
 
+  
+
+        <p><img src="https://image.flaticon.com/icons/png/512/44/44631.png" width="17" height="17" />  Hours Open:</p>
+        <div onClick= {() => this.setState({clicked: !this.state.clicked})}>
+         {
+            this.state.clicked? this.showTime() : this.showAllTime()
+         }
+         <br/>
+    
+         </div>
+
+
       </div>
+
       )
   }
 }

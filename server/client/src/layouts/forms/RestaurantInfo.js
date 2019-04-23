@@ -105,12 +105,11 @@ export class RestaurantInfo extends Component {
                 <div className="row">
                   
                     <div className="w-100"></div>
-                    <div className="col" style={{padding: "2% 0", marginTop: "0%", marginLeft: "5%"}}>
+                    <div className="col" style={{padding: "2% 0", marginTop: "0%", marginLeft: "5%", width:"500px"}}>
                         {this.getStep2Content()}
                     </div>
                 </div>
             </div>
-            <SignUpSuccess open={this.state.signUpSuccess} onClose={this.handleDialogClose}/>
         </div> 
 
 

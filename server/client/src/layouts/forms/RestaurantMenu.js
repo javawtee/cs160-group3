@@ -10,7 +10,6 @@ export class RestaurantMenu extends Component {
   render () {                                    
     return (
       <div>
-       <p>Restaurant menu page</p>
        <p>$4.99 Egg McMuffin</p>
        <p>$4.99 Egg White Delight McMuffin</p>
        <p>$4.99 Sausage McMuffin</p>
