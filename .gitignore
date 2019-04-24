@@ -25,3 +25,8 @@ server/package-lock.json
 
 server/client/package-lock.json
 server/app.js
+server/package-lock.json
+schema/testdb-model.mwb
+server/package-lock.json
+server/.vscode/launch.json
+server/package-lock.json
