@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import {Link} from "react-router-dom";
 
+import Customer from "./Customer";
 import LoginForm from "./forms/LoginForm";
 import SignUp from "./SignUp";
 import About from "./About";
@@ -25,8 +26,10 @@ export class HomePage extends Component {
 
     getContent(){
         switch(this.state.currentContent){
+            case "home":
+                return <Customer />
             case "login":
-                return <LoginForm switchToConsole={this.props.switchToConsole}/>; // pass to App
+                return <LoginForm switchToConsole={this.props.switchToConsole}/>; // pass back to App
             case "sign-up":
                 return <SignUp />;
             case "about":
@@ -52,7 +55,14 @@ export class HomePage extends Component {
             <div className="collapse navbar-collapse" id="navbarSupportedContent">
             <ul className="navbar-nav mr-auto">
                 <li>
-                    <Link className={currentContent === "login" ? "nav-item active" : "nav-item"} to="/">
+                    <Link className={currentContent === "home" ? "nav-item active" : "nav-item"} to="/">
+                        <div className="nav-link">
+                            HOME
+                        </div>
+                    </Link>
+                </li>
+                <li>
+                    <Link className={currentContent === "login" ? "nav-item active" : "nav-item"} to="/login">
                         <div className="nav-link">
                             Login
                         </div>

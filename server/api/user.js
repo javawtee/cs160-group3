@@ -1,11 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const connection = require("./connector");
+var UserManager = require("./userManager");
 
 router.post('/login', (req, res) => {
+    var uuid = req.body.uuid; // a reference index for user in back-end
     var uid = req.body.userId
     var pw = req.body.password
-    connection.query("SELECT userId,userName,userType,address,phoneNumber,email,approvedDate FROM users" +  
+    connection.query("SELECT id, userName,userType,phoneNumber,email,approvedDate FROM users" +  
                           " WHERE userId=? AND password=? AND approved=1",[uid, pw] , (err, rows) => {
       if(err) throw err
       else {
@@ -15,15 +17,18 @@ router.post('/login', (req, res) => {
           results: []
         }
         if(rows.length > 0) {
+          // use userType to determine group of users in back-end
           payload.results.push({
-            userId: rows[0].userId,
+            uuid,
             userName: rows[0].userName,
             userType: rows[0].userType,
-            address: rows[0].address,
             phoneNumber: rows[0].phoneNumber,
             email: rows[0].email,
             approvedDate: rows[0].approvedDate
           })
+          // successfully logged in, store in array of online users
+          var id = rows[0].id;
+          UserManager.addOnlineUsers({uuid, id})
         }
         // else send default initialization of data
         res.json(payload);
@@ -38,7 +43,11 @@ router.get('/exists/:userId', (req, res) => {
           if(err) throw err
           else {
             var payload = {
-              numOfResults : rows.length,
+              numOfResults: rows.length,
+              email: null,
+            }
+            if(rows.length > 0){
+              payload.email = rows[0].email;
             }
             res.json(payload);
           }
@@ -100,6 +109,11 @@ router.post("/edit-information", (req,res) => {
       }
     })
   }
+})
+
+router.get("/test1", (req,res) => {
+  UserManager.getOnlineUsers("5357462e-2345-58bb-9617-a72775f99607").then(u => res.send(u)).catch(err => res.send(err))
+  //const a = UserManager.getOnlineUsers().then(test => res.send(test));
 })
 
 module.exports = router;

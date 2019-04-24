@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import Auth from "../../components/Auth";
 import ForgotPassword from "../dialog/ForgotPassword";
 import { Checkbox } from '@material-ui/core';
+import uuid5 from "uuid/v5";
 
 export class LoginForm extends Component {
     constructor(props){
@@ -10,7 +11,8 @@ export class LoginForm extends Component {
         userId: '',
         password: '',
         saveLocal: false,
-        forgotPassword: false
+        forgotPassword: false,
+        who: this.props.who
       };
     }
     handleOpenForgotPassword = this.handleOpenForgotPassword.bind(this);
@@ -20,6 +22,8 @@ export class LoginForm extends Component {
       e.preventDefault();
       const {userId, password} = this.state;
       if(userId !== "" && password !== ""){
+          const NAMESPACE = "45e669ee-e736-4354-9efc-e1d620b18c69"; // random UUID
+          const uuid = uuid5(userId, NAMESPACE)
           fetch("/user/login", 
             {
             method: "POST",
@@ -27,14 +31,14 @@ export class LoginForm extends Component {
               "Accept": "application/json",
               "Content-Type": "application/json"
             },
-            body: JSON.stringify({userId, password})
+            body: JSON.stringify({uuid, userId, password})
           })
           .then(res => res.json())
           .then(payload => {
             if(payload.numOfResults === 0)
               alert("UserID or Password is incorrect");
             else {
-              Auth.login(this.state.saveLocal, payload.results[0]); // create session
+              Auth.login(this.state.saveLocal, payload.results[0]); // create login session
               this.props.switchToConsole(); // passing to HomePage
             }
           }) // whenever setState is called, this component will be re-rendered
@@ -94,7 +98,10 @@ export class LoginForm extends Component {
 
               <div className="w-100"></div>
               <div className="col-12">
-                <button className="col btn btn-primary" type='submit'>Login</button>
+                <button className="col btn btn-primary" type='submit'>Login</button><br/>
+                <a href="/" onClick={this.props.handleCustomerSignUp} style={{display: this.state.who !== undefined ? "block" : "none"}}>
+                  Create an account
+                </a>
               </div>
             </div>
           </div>

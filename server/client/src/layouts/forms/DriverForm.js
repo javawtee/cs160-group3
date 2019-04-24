@@ -120,7 +120,7 @@ export class DriverForm extends Component {
         <form onSubmit={this.handleSubmit}>
             <div className="row" style={{padding: "2% 10%"}}>
                 <div className="col">
-                <label>User ID:</label>
+                  <label>User ID:</label>
                   <input style={this.toggleError(0)} type="text" className="form-control" name="userId" autoFocus
                           value={this.state.userId} onChange={this.handleOnChange} onBlur={this.validateUserId}/>
                   <small style={this.toggleTextError(0)} className="input-error form-text text-muted">
