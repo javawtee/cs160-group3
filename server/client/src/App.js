@@ -18,10 +18,17 @@ class App extends Component {
       <div className="App" >
         <Switch>
           <Route exact path="/" component={() => 
-            authenticated ? <Redirect to="/console"/> : <HomePage switchToConsole={() => this.setState({authenticated: true})} content="login"/>} />
-          <Route exact path="/:content(sign-up|about)" 
-            component={(props) =>  authenticated? <Redirect to="/console"/> : <HomePage content={props.match.params.content} />} />
+            authenticated ? <Redirect to="/console"/> : <HomePage content="home"/>} />
+
+          <Route exact path="/:content(login|sign-up|about)" 
+            component={(props) =>  
+                    authenticated? <Redirect to="/console"/> 
+                    : 
+                    <HomePage content={props.match.params.content} 
+                    switchToConsole={() => this.setState({authenticated: true})}  />} />
+
           <Route exact path="/console" component={() =>  authenticated? <User /> : <Redirect to="/"/>}/>
+
           <Route path="*" render={() => "404 PAGE NOT FOUND"} />
         </Switch>        
       </div>

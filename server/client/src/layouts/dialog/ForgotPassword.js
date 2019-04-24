@@ -23,8 +23,26 @@ export class ForgotPassword extends Component {
             fetch("/user/exists/" + userId)
             .then(res => res.json())
             .then(payload => {
-                if(payload.numOfResults > 0){ // > 0 ==> exists ==> true
-                    this.props.onClose();
+                if(payload.numOfResults > 0){
+                    var to = payload.email;
+                    var subject = "test sending email";
+                    var content = "worked"; 
+                    fetch("/mailer", 
+                    {
+                        method: "POST",
+                        headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({to, subject, content})
+                    })
+                    .then(() => {
+                        alert("Successfully sent recovery password. If you don't see email, check in Spam")
+                        this.props.onClose()
+                    }).catch(() => {
+                        alert("Failed to send email")
+                        return;
+                    })
                 } else
                     this.setState({error: true});
             })

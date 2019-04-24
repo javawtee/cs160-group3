@@ -1,6 +1,3 @@
-import uuid5 from "uuid/v5";
-import PropTypes from "prop-types";
-
 class Auth {
     login = (storeLocal, userInfo) => {
         const token = getToken(userInfo);
@@ -25,17 +22,15 @@ class Auth {
 }
 
 function getToken(userInfo){
-    const { userId, userName, userType, address, phoneNumber, email, approvedDate} = userInfo;
-    const NAMESPACE = "45e669ee-e736-4354-9efc-e1d620b18c69"; // random UUID
+    const { uuid, userName, userType, address, phoneNumber, email, approvedDate} = userInfo;
     var aToken = JSON.stringify({
-        uuid: uuid5(userName, NAMESPACE),
-        userId,
+        uuid,
         userName,
         userType,
-        address,
+        address:"null",
         phoneNumber,
         email,
-        approvedDate,
+        approvedDate, // joined date
     }); // aToken is a JSON string
     return aToken;
 }

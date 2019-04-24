@@ -219,7 +219,7 @@ export class UserInformation extends Component {
                     </small>
                 </td>
                 </tr>
-                <tr className="editable-tr" style={{display: address !== null ? "block" : "none"}}>
+                <tr className="editable-tr" style={{display: address !== null ? "" : "none"}}>
                 <td>Address: </td>
                 <td>
                     <input style={this.toggleError(4)} name="address" type="text" 

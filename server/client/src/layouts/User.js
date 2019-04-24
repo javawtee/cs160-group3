@@ -10,11 +10,6 @@ const styles = {
 };
 
 export class User extends Component {
-  constructor(props){
-    super(props);
-  }
-  
-
   handleLogOut(e){
     e.preventDefault();
     Auth.logout();
