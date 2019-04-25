@@ -1,0 +1,113 @@
+INSERT INTO users Values(1,"tacobell1","tacobell1","restaurant",1111111111,1@1.com,now(),1,now())
+INSERT INTO restaurant VALUES(1,"tacobell1",NULL,"840 S Bascom Ave\, San Jose\, CA 95172",tacobell.jpg)
+
+INSERT INTO users Values(2,"tacobell2","tacobell2","restaurant",1111111112,2@1.com,now(),1,now())
+INSERT INTO restaurant VALUES(2,"tacobell2",NULL,"2770 Alum Rock Ave\, San Jose\, CA 95127",tacobell.jpg)
+
+INSERT INTO users Values(3,"tacobell3","tacobell3","restaurant",1111111113,3@1.com,now(),1,now())
+INSERT INTO restaurant VALUES(3,"tacobell3",NULL,"2415 S King Rd\, San Jose\, CA",tacobell.jpg)
+
+INSERT INTO users Values(4,"tacobell4","tacobell4","restaurant",1111111114,4@1.com,now(),1,now())
+INSERT INTO restaurant VALUES(4,"tacobell4",NULL,"535 W, Capitol Expy\, San Jose\, CA 95136",tacobell.jpg)
+
+INSERT INTO users Values(5,"tacobell5","tacobell5","restaurant",1111111115,5@1.com,now(),1,now())
+INSERT INTO restaurant VALUES(5,"tacobell5",NULL,"2471 Berryessa Rd\, San Jose\, CA 95132",tacobell.jpg)
+
+INSERT INTO users Values(6,"tacobell6","tacobell6","restaurant",1111111116,6@1.com,now(),1,now())
+INSERT INTO restaurant VALUES(6,"tacobell6",NULL,"2779 Aborn Rd\, San Jose\, CA 95121",tacobell.jpg)
+
+INSERT INTO users Values(7,"tacobell7","tacobell7","restaurant",1111111117,7@1.com,now(),1,now())
+INSERT INTO restaurant VALUES(7,"tacobell7",NULL,"2555 The Alameda\, Santa Clara\, CA 95050",tacobell.jpg)
+
+INSERT INTO users Values(8,"tacobell8","tacobell8","restaurant",1111111118,8@1.com,now(),1,now())
+INSERT INTO restaurant VALUES(8,"tacobell8",NULL,"1370 Blossom Hill Rd\, San Jose\, CA 95118",tacobell.jpg)
+
+INSERT INTO users Values(9,"tacobell9","tacobell9","restaurant",1111111119,9@1.com,now(),1,now())
+INSERT INTO restaurant VALUES(9,"tacobell9",NULL,"1298 Winchester Blvd\, San Jose\, CA 95128",tacobell.jpg)
+
+INSERT INTO users Values(10,"tacobell10","tacobell10","restaurant",11111111110,10@1.com,now(),1,now())
+INSERT INTO restaurant VALUES(10,"tacobell10",NULL,"1680 El Camino Real\, Santa Clara\, CA 95050",tacobell.jpg)
+
+INSERT INTO users Values(11,"tacobell11","tacobell11","restaurant",11111111111,11@1.com,now(),1,now())
+INSERT INTO restaurant VALUES(11,"tacobell11",NULL,"5431 Camden Ave\, San Jose\, CA 95124",tacobell.jpg)
+
+INSERT INTO users Values(12,"tacobell12","tacobell12","restaurant",11111111112,12@1.com,now(),1,now())
+INSERT INTO restaurant VALUES(12,"tacobell12",NULL,"3690 Stevens Creek Blvd\, San Jose\, CA 95117",tacobell.jpg)
+
+INSERT INTO users Values(13,"wendys1","wendys1","restaurant",2222222222,1@2.com,now(),1,now())
+INSERT INTO restaurant VALUES(13,"wendys1",NULL,"1405 Monterey Rd\, San Jose\, CA 95110",wendys.jpg)
+
+INSERT INTO users Values(14,"wendys2","wendys2","restaurant",2222222223,2@2.com,now(),1,now())
+INSERT INTO restaurant VALUES(14,"wendys2",NULL,"2275 McKee Rd\, San Jose\, CA 95116",wendys.jpg)
+
+INSERT INTO users Values(15,"wendys3","wendys3","restaurant",2222222224,3@2.com,now(),1,now())
+INSERT INTO restaurant VALUES(15,"wendys3",NULL,"782 S Bascom Ave\, San Jose\, CA 95128",wendys.jpg)
+
+INSERT INTO users Values(16,"wendys4","wendys4","restaurant",2222222225,4@2.com,now(),1,now())
+INSERT INTO restaurant VALUES(16,"wendys4",NULL,"1845 E Capitol Expy\, San Jose\, CA 95121",wendys.jpg)
+
+INSERT INTO users Values(17,"wendys5","wendys5","restaurant",2222222226,5@2.com,now(),1,now())
+INSERT INTO restaurant VALUES(17,"wendys5",NULL,"2624 S Bascom Ave\, San Jose\, CA 95124",wendys.jpg)
+
+INSERT INTO users Values(18,"wendys6","wendys6","restaurant",2222222227,6@2.com,now(),1,now())
+INSERT INTO restaurant VALUES(18,"wendys6",NULL,"990 Saratoga Ave\, San Jose\, CA 95129",wendys.jpg)
+
+INSERT INTO users Values(19,"wendys7","wendys7","restaurant",2222222228,7@2.com,now(),1,now())
+INSERT INTO restaurant VALUES(19,"wendys7",NULL,"1313 S Wolfe Rd\, Sunnyvale\, CA 94087",wendys.jpg)
+
+INSERT INTO users Values(20,"jackinthebox1","jackinthebox1","restaurant",3333333333,1@3.com,now(),1,now())
+INSERT INTO restaurant VALUES(20,"jackinthebox1",NULL,"148 E San Carlos St\, San Jose\, CA 95112",wendys.jpg)
+
+INSERT INTO users Values(21,"jackinthebox2","jackinthebox2","restaurant",3333333334,2@3.com,now(),1,now())
+INSERT INTO restaurant VALUES(21,"jackinthebox2",NULL,"1490 Monterey Rd\, San Jose\, CA 95110",wendys.jpg)
+
+INSERT INTO users Values(22,"jackinthebox3","jackinthebox3","restaurant",3333333335,3@3.com,now(),1,now())
+INSERT INTO restaurant VALUES(22,"jackinthebox3",NULL,"1075 Willow St\, San Jose\, CA 95125",wendys.jpg)
+
+INSERT INTO users Values(23,"jackinthebox4","jackinthebox4","restaurant",3333333336,4@3.com,now(),1,now())
+INSERT INTO restaurant VALUES(23,"jackinthebox4",NULL,"1558 W San Carlos St\, San Jose\, CA 95126",wendys.jpg)
+
+INSERT INTO users Values(24,"jackinthebox5","jackinthebox5","restaurant",3333333337,5@3.com,now(),1,now())
+INSERT INTO restaurant VALUES(24,"jackinthebox5",NULL,"1841 Story Rd\, San Jose\, CA 95122",wendys.jpg)
+
+INSERT INTO users Values(25,"jackinthebox6","jackinthebox6","restaurant",3333333338,6@3.com,now(),1,now())
+INSERT INTO restaurant VALUES(25,"jackinthebox6",NULL,"697 Curtner Ave\, San Jose\, CA 95125",wendys.jpg)
+
+INSERT INTO users Values(26,"jackinthebox7","jackinthebox7","restaurant",3333333339,7@3.com,now(),1,now())
+INSERT INTO restaurant VALUES(26,"jackinthebox7",NULL,"15 S Capitol Ave\, San Jose\, CA 95127",wendys.jpg)
+
+INSERT INTO users Values(27,"jackinthebox8","jackinthebox8","restaurant",3333333340,8@3.com,now(),1,now())
+INSERT INTO restaurant VALUES(27,"jackinthebox8",NULL,"1632 Tully Rd\, San Jose\, CA 95122",wendys.jpg)
+
+INSERT INTO users Values(28,"jackinthebox9","jackinthebox9","restaurant",3333333341,9@3.com,now(),1,now())
+INSERT INTO restaurant VALUES(28,"jackinthebox9",NULL,"611 E Capitol Expy\, San Jose\, CA 95111",wendys.jpg)
+
+INSERT INTO users Values(29,"jackinthebox10","jackinthebox10","restaurant",3333333342,10@3.com,now(),1,now())
+INSERT INTO restaurant VALUES(29,"jackinthebox10",NULL,"3493 McKee Rd\, San Jose\, CA 95127",wendys.jpg)
+
+INSERT INTO users Values(30,"jackinthebox11","jackinthebox11","restaurant",3333333343,11@3.com,now(),1,now())
+INSERT INTO restaurant VALUES(30,"jackinthebox11",NULL,"3395 Stevens Creek Blvd\, San Jose\, CA 95117",wendys.jpg)
+
+INSERT INTO users Values(31,"jackinthebox12","jackinthebox12","restaurant",3333333344,12@3.com,now(),1,now())
+INSERT INTO restaurant VALUES(31,"jackinthebox11",NULL,"4602 Almaden Expy\, San Jose\, CA 95118",wendys.jpg)
+
+INSERT INTO user Values(32, "mcdonalds1`, `mcdonalds1`,"restaurant", 1111111111, 1@1.com, now(), 1, now());
+INSERT INTO restaurant Values(32, "mcdonalds2", NULL, "1299 E Santa Clara St\, San Jose\, CA 95116", mcdonalds.jpg);
+INSERT INTO user Values(33, "mcdonalds2`, `mcdonalds2`,"restaurant", 1111111342, 1@1.com, now(), 1, now());
+INSERT INTO restaurant Values(33, "mcdonalds2", NULL, "1398 W San Carlos\, San Jose\, CA 95126", mcdonalds.jpg);
+INSERT INTO user Values(34, "mcdonalds3`, `mcdonalds3`,"restaurant", 1111111122, 5@8.com, now(), 1, now());
+INSERT INTO restaurant Values(34, "mcdonalds3", NULL, "2191 Monterey Rd\, San Jose\, CA 95125", mcdonalds.jpg);
+INSERT INTO user Values(35, "mcdonalds4`, `mcdonalds4`,"restaurant", 1111111122, 5@8.com, now(), 1, now());
+INSERT INTO restaurant Values(35, "mcdonalds4", NULL, "585 Tully Rd\, San Jose\, CA 95112", mcdonalds.jpg);
+INSERT INTO user Values(36, "mcdonalds5`, `mcdonalds5`,"restaurant", 1111111122, 5@8.com, now(), 1, now());
+INSERT INTO restaurant Values(36, "mcdonalds5", NULL, "1935 Tully Rd\, San Jose\, CA 95122", mcdonalds.jpg);
+INSERT INTO user Values(37, "mcdonalds6`, `mcdonalds6`,"restaurant", 1111111122, 5@8.com, now(), 1, now());
+INSERT INTO restaurant Values(37, "mcdonalds6", NULL, "2353 McKee Rd\, San Jose\, CA 95116", mcdonalds.jpg);
+INSERT INTO user Values(38, "mcdonalds7`, `mcdonalds7`,"restaurant", 1111111122, 5@8.com, now(), 1, now());
+INSERT INTO restaurant Values(38, "mcdonalds7", NULL, "898 S Bascom Ave\, San Jose\, CA 95128", mcdonalds.jpg);
+INSERT INTO user Values(39, "mcdonalds8`, `mcdonalds8`,"restaurant", 1111111122, 5@8.com, now(), 1, now());
+INSERT INTO restaurant Values(39, "mcdonalds8", NULL, "2434 Almaden Rd\, San Jose\, CA 95125", mcdonalds.jpg);
+INSERT INTO user Values(40, "mcdonalds9`, `mcdonalds9`,"restaurant", 1111111122, 5@8.com, now(), 1, now());
+INSERT INTO restaurant Values(40, "mcdonalds9", NULL, "2040 N 1st St\, San Jose\, CA 95131", mcdonalds.jpg;
+INSERT INTO user Values(41, "mcdonalds10`, `mcdonalds10`,"restaurant", 1111111122, 5@8.com, now(), 1, now());
+INSERT INTO restaurant Values(51, "mcdonalds10", NULL, "1451 Coleman Ave\, Santa Clara\, CA 95050", mcdonalds.jpg);
