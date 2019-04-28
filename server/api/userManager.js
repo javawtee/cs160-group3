@@ -49,11 +49,12 @@ class UserManager {
         // element is id, as driver id; requested for location
         this.tobeRequestedLocation = [],
         // {id, driverLocation}
-        this.driverTrackerResponse = [{id: 5, driverLocation:{latitude: 37.531760, longitude: -122.027990}}],
-        // {uuid, deliveryDetails:{restaurant:{name, address, geocode:{latitude, longitude}}, orders:[{order1, order2}]}} 
+        //this.driverTrackerResponse = [{id: 5, driverLocation:{latitude: 37.531760, longitude: -122.027990}}],
+        this.driverTrackerResponse = [],
+	// {uuid, deliveryDetails:{restaurant:{name, address, geocode:{latitude, longitude}}, orders:[{order1, order2}]}} 
         // order1:{id, customerInfo, items, estimatedDeliveryTime}
-        this.tobeNotifiedDrivers = [ // added from findClosestDriver
-            {
+        this.tobeNotifiedDrivers = [], // added from findClosestDriver
+        /*    {
                 uuid: "0f457377-b8b6-539b-8f56-2114155fab6e",
                 deliveryDetails: {
                     restaurant:{
@@ -80,20 +81,20 @@ class UserManager {
                     ],
                 },
             }
-        ], 
+        ],*/ 
         // {uuid: 1, id: 2, location: {latitude: 1, longitude: 1}} as FIFO scheduling
-        this.availableDrivers = [{
-            uuid: 1,
+        this.availableDrivers = [], //{
+        /*    uuid: 1,
             id: 2,
             location: {latitude: 37.524270, longitude: -122.002150}
-        }],
+        }],*/
         // {uuid, deliveryDetails:{restaurant:{name, address}, orders:[{order1, order2}]}}
         this.deliveringDrivers = [],
         // --- RESTAURANT
         // {uuid, id, deliveryStatus}
         // deliveryStatus: 0:looking for driver, 1: delivering, 2: delivered
-        this.tobeNotifiedRestaurants = [{
-                uuid: "5357462e-2345-58bb-9617-a72775f99607",
+        this.tobeNotifiedRestaurants = [], //{
+        /*        uuid: "5357462e-2345-58bb-9617-a72775f99607",
                 id: 5,
                 deliveryStatus: 1,
             },
@@ -102,9 +103,9 @@ class UserManager {
                 id: 6,
                 deliveryStatus: 2,
             }
-        ]
+        ]*/
         // {deliveryDetails:{restaurant:{name, address, , geocode:{latitude, longitude}}, orders:[{order1, order2}]}}
-        this.pendingOrders = [
+        this.pendingOrders = [] /*
             {
                 restaurant:{name:"a restaurant",
                                 address:"39131 cedar blvd, newark, 94560",
@@ -112,7 +113,7 @@ class UserManager {
                 orders:[{customerName:"THONG HOANG LE",customerAddress:"2957 Bowery Lane",customerPhone:"4084428953",
                         orderedItems:[{category:"Hot food",id:1,name:"Hot Food 1",price:"1.99",amount:"5"}],id:0}]
             }
-        ]
+        ]*/
     }
 
     // ---- ADMIN

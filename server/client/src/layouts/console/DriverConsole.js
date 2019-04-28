@@ -72,7 +72,7 @@ export class DriverConsole extends Component {
       this.getCurrentLocation((latitude, longitude) => {
         var currentLocation = {latitude, longitude};
         this.setState({currentLocation}, () => {
-          var ws= new WebSocket("ws://localhost:5001/driver")
+          var ws= new WebSocket("ws://3.87.213.235:5001/driver")
           ws.onopen = () => {
             const {currentLocation} = this.state;
             var clientMetaData = {

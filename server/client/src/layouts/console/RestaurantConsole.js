@@ -40,7 +40,7 @@ export class RestaurantConsole extends Component {
 
     if(this.state.ws === null){
       // ws = null => user refreshed page, ws set back to null
-      this.setState({ws: new WebSocket("ws://localhost:5002/restaurant")}, () => {
+      this.setState({ws: new WebSocket("ws://3.87.213.235:5002/restaurant")}, () => {
         const ws = this.state.ws;
         ws.onmessage = (e) => {
           var update = JSON.parse(e.data);
@@ -54,7 +54,6 @@ export class RestaurantConsole extends Component {
           var res = JSON.parse(e.data);
           if(res.message !== undefined && res.message !== "failed"){
             var driverLocation = res.driverLocation;
-            console.log("^^^" + res.id);
             console.log(this.state.orders.filter(order => order.id === res.id))
             var customerAddress = "Lion Supermarket, Newark, CA 94560";
             // geocode destination / customer address

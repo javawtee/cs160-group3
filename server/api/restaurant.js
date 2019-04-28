@@ -44,12 +44,12 @@ wss.on("connection", (ws) => {
 
 
 router.post("/today", (req, res) => {
-    //UserManager.getOnlineUsers(req.body.restaurant_uuid).then(info => {
+    UserManager.getOnlineUsers(req.body.restaurant_uuid).then(info => {
         connection.query(`SELECT id, customer_name AS customerName,
                                 customer_address AS customerAddress,
                                 customer_phone AS customerPhone,
                                 items AS orderedItems, driver_id, delivery_status AS deliveryStatus FROM orders
-                                WHERE restaurant_id=${1} AND DAY(order_date)=DAY(NOW())`, (err,rows) => {
+                                WHERE restaurant_id=${info.id} AND DAY(order_date)=DAY(NOW())`, (err,rows) => {
                 if(err) {console.log(err);res.json(err)}
                 else {
                     if(rows.length > 0){
@@ -63,14 +63,14 @@ router.post("/today", (req, res) => {
                     res.json(payload);
                 }
         })
-    //}).catch(err => res.send(err))
+    }).catch(err => res.send(err))
 })
 
 router.post("/add-orders", (req, res) => {
     var deliveryDetails = req.body.deliveryDetails;
     var orders = deliveryDetails.orders;
-    //UserManager.getOnlineUsers(req.body.restaurant_uuid).then(info => {
-        var restaurant_id = 1;
+    UserManager.getOnlineUsers(req.body.restaurant_uuid).then(info => {
+        var restaurant_id = info.id;
         var query = "INSERT INTO orders(restaurant_id, customer_name, customer_address, customer_phone, items) VALUES ?";
         var values = [];
         orders.map(order => {
@@ -92,7 +92,7 @@ router.post("/add-orders", (req, res) => {
                 UserManager.addPendingOrder(deliveryDetails, false); // this is new order, never been rejected (false) by driver
             }
         })
-    //}).catch(err => console.log(err));
+    }).catch(err => console.log(err));
     
 })
 
