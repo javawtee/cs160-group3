@@ -21,6 +21,9 @@ SET time_zone = "+00:00";
 --
 -- Database: `testdb`
 --
+CREATE DATABASE testdb;
+
+use testdb;
 
 -- --------------------------------------------------------
 
