@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 24, 2019 at 11:22 AM
+-- Generation Time: Apr 28, 2019 at 08:32 PM
 -- Server version: 10.1.38-MariaDB
 -- PHP Version: 7.3.2
 
@@ -21,8 +21,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `testdb`
 --
-CREATE DATABASE IF NOT EXISTS `testdb` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
-USE `testdb`;
 
 -- --------------------------------------------------------
 
@@ -53,15 +51,24 @@ CREATE TABLE `orders` (
   `customer_phone` varchar(10) COLLATE utf8_unicode_ci NOT NULL,
   `items` longtext COLLATE utf8_unicode_ci NOT NULL,
   `driver_id` int(11) DEFAULT NULL,
-  `delivery_status` int(11) NOT NULL DEFAULT '0'
+  `delivery_status` int(11) NOT NULL DEFAULT '0',
+  `delivery_fee` double DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
 -- Dumping data for table `orders`
 --
 
-INSERT INTO `orders` (`id`, `restaurant_id`, `order_date`, `customer_name`, `customer_address`, `customer_phone`, `items`, `driver_id`, `delivery_status`) VALUES
-(1, 1, '2019-04-24 02:06:53', 'THONG HOANG LE', '2957 Bowery Lane', '4084428953', '[{\"category\":\"Hot food\",\"id\":1,\"name\":\"Hot Food 1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaannnnnbaswweertt\",\"price\":\"1.99\",\"amount\":\"54\"}]', NULL, 0);
+INSERT INTO `orders` (`id`, `restaurant_id`, `order_date`, `customer_name`, `customer_address`, `customer_phone`, `items`, `driver_id`, `delivery_status`, `delivery_fee`) VALUES
+(1, 1, '2019-04-25 03:43:26', 'THONG HOANG LE', '2957 Bowery Lane', '4084428953', '[{\"category\":\"Hot food\",\"id\":1,\"name\":\"Hot Food 1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaannnnnbaswweertt\",\"price\":\"1.99\",\"amount\":\"5\"}]', 1, 0, 0),
+(2, 1, '2019-04-25 03:43:26', 'THONG HOANG LE', '2957 Bowery Lane', '4084428953', '[{\"category\":\"Hot food\",\"id\":1,\"name\":\"Hot Food 1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaannnnnbaswweertt\",\"price\":\"1.99\",\"amount\":\"5\"}]', 1, 0, 0),
+(3, 1, '2019-04-25 03:44:10', 'THONG HOANG LE', '2957 Bowery Lane', '4084428953', '[{\"category\":\"Hot food\",\"id\":1,\"name\":\"Hot Food 1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaannnnnbaswweertt\",\"price\":\"1.99\",\"amount\":\"5\"}]', NULL, 0, 0),
+(4, 1, '2019-04-25 03:44:10', 'THONG HOANG LE', '2957 Bowery Lane', '4084428953', '[{\"category\":\"Hot food\",\"id\":1,\"name\":\"Hot Food 1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaannnnnbaswweertt\",\"price\":\"1.99\",\"amount\":\"6\"}]', NULL, 0, 0),
+(5, 1, '2019-04-27 14:24:54', 'THONG HOANG LE', '2957 Bowery Lane', '4084428953', '[{\"category\":\"Hot food\",\"id\":1,\"name\":\"Hot Food 1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaannnnnbaswweertt\",\"price\":\"1.99\",\"amount\":\"5\"}]', NULL, 0, 0),
+(6, 1, '2019-04-27 14:41:51', 'LE HOANG THONG', '38b/2 Hoc Lac, P14 Q5', '4084428953', '[{\"category\":\"Hot food\",\"id\":2,\"name\":\"Hot Food 2\",\"price\":\"21.99\",\"amount\":\"6\"}]', NULL, 0, 0),
+(7, 1, '2019-04-27 17:17:42', 'THONG HOANG LE', '2957 Bowery Lane', '4084428953', '[{\"category\":\"Hot food\",\"id\":1,\"name\":\"Hot Food 1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaannnnnbaswweertt\",\"price\":\"1.99\",\"amount\":\"3\"}]', NULL, 0, 0),
+(8, 1, '2019-04-27 17:18:30', 'THONG HOANG LE', '2957 Bowery Lane', '4084428953', '[{\"category\":\"Hot food\",\"id\":1,\"name\":\"Hot Food 1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaannnnnbaswweertt\",\"price\":\"1.99\",\"amount\":\"1\"}]', NULL, 0, 0),
+(9, 1, '2019-04-27 23:48:43', 'THONG HOANG LE', '2957 Bowery Lane', '4084428953', '[{\"category\":\"Hot food\",\"id\":1,\"name\":\"Hot Food 1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaannnnnbaswweertt\",\"price\":\"1.99\",\"amount\":\"5\"}]', NULL, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -82,7 +89,9 @@ CREATE TABLE `restaurant` (
 --
 
 INSERT INTO `restaurant` (`restaurantId`, `users_id`, `restaurantDescription`, `address`, `logoUrl`) VALUES
-(1, 1, NULL, 'abcccc', 'restaurant-logo.jpg');
+(1, 1, NULL, '', 'restaurant-logo.jpg'),
+(2, 3, NULL, '39111 Cedar Blvd, Newark, CA 94560', '/media/stock-photo.jpg'),
+(3, 4, NULL, '2957 Bowery Lane', '/media/stock-photo.jpg');
 
 -- --------------------------------------------------------
 
@@ -108,8 +117,12 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `userId`, `password`, `userName`, `userType`, `phoneNumber`, `email`, `submittedDate`, `approved`, `approvedDate`) VALUES
-(1, 'tester1', '123', 'a restaurant', 'restaurant', '123', 'javawtee@gmail.com', '2019-04-23 21:24:27', 1, NULL),
-(2, 'tester2', '123', 'a driver', 'driver', '123', 'bahahaha@gmail.com', '2019-04-23 21:24:34', 0, NULL);
+(1, 'tester1', '84561379', 'a restaurant', 'restaurant', '1233333333', 'thongle7592@gmail.com', '2019-04-23 21:24:27', 1, '2019-04-27 22:58:13'),
+(2, 'tester2', '123', 'a driver', 'driver', '123', 'bahahaha@gmail.com', '2019-04-23 21:24:34', 1, '2019-04-27 23:56:57'),
+(3, 'tester3', '84561379', 'A RESTAURANT 2', 'restaurant', '4084428953', 'thongle7592@gmail.com', '2019-04-27 22:50:09', 0, NULL),
+(4, 'tester22', '456987123', 'asdf', 'restaurant', '4084428953', 'thongle7592@gmail.com', '2019-04-27 22:56:53', 0, NULL),
+(5, 'thongle', '654789321', 'THONG LE', 'driver', '4084428953', 'thongle7592@gmail.com', '2019-04-27 22:57:14', 1, '2019-04-27 22:57:36'),
+(6, 'thongle222', '*B34956D1FD49F0D180D16E232D69316', 'THONG LE', 'driver', '4084428953', 'thongle7592@gmail.com', '2019-04-27 23:24:35', 1, '2019-04-27 23:25:05');
 
 --
 -- Indexes for dumped tables
@@ -158,19 +171,19 @@ ALTER TABLE `menu`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `restaurant`
 --
 ALTER TABLE `restaurant`
-  MODIFY `restaurantId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `restaurantId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- Constraints for dumped tables
