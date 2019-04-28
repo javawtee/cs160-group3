@@ -64,8 +64,7 @@ export class UserInformation extends Component {
     
       verifyPassword = (e) => {
         e.preventDefault();
-        console.log(this.userInfo)
-        const userId = this.userInfo.userId;
+        const uuid = JSON.parse(sessionStorage.getItem("user-token")).uuid;
         const oldPassword = this.state.oldPassword;
         fetch("/user/edit-information", 
           {
@@ -74,7 +73,7 @@ export class UserInformation extends Component {
             "Accept": "application/json",
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({userId, oldPassword})
+          body: JSON.stringify({uuid, oldPassword})
         })
         .then(res => res.json())
         .then(payload => {
@@ -84,7 +83,7 @@ export class UserInformation extends Component {
                 const errors = [false,false,false,false,false]
                 this.setState({verified: true, errors})
             }
-        }) // whenever setState is called, this component will be re-rendered
+        })
       }
     
       toggleError = (inputIndex) => {
@@ -101,7 +100,7 @@ export class UserInformation extends Component {
     
       handleSubmit(e){
         e.preventDefault();
-        const userId = this.userInfo.userId;
+        const uuid = JSON.parse(sessionStorage.getItem("user-token")).uuid;
         const {oldPassword, newPassword, confirmNewPassword, address, phoneNumber, email} = this.state
         var newErrors = this.state.errors; // by using clone ==> avoid state mutation in React-pattern
         newErrors[0] = newPassword.length > 0 && !Validate.validPassword(newPassword); // true: length > 6 and strength score > 1 ==> newErrors[0] = false
@@ -124,7 +123,7 @@ export class UserInformation extends Component {
                     "Accept": "application/json",
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({userId, oldPassword, newPassword, address, phoneNumber, email})
+                body: JSON.stringify({uuid, oldPassword, newPassword, address, phoneNumber, email})
             })
             .then(res => res.json())
             .then(payload => {

@@ -56,8 +56,8 @@ export class PlaceOrder extends Component {
     setInterval(this.updateOrderRemainingTime, 1000);
   }
 
-  componentWillReceiveProps = () => {
-      if(!this.props.open){
+  componentWillReceiveProps = (nextProps) => {
+      if(nextProps.open && sessionStorage.getItem("ordersInARow") === null){
         console.log("created session");
         sessionStorage.setItem("ordersInARow", JSON.stringify([]));
         this.setState(initialState, () => this.setState({resetMenu: false, orderedItems:[], ordersInARow:[]}));
@@ -82,7 +82,7 @@ export class PlaceOrder extends Component {
 
   // clear pending or successful order
   clearOrder = () => {
-    sessionStorage.setItem("ordersInARow", JSON.stringify([]));
+    sessionStorage.setItem("ordersInARow", JSON.stringify([]))
     this.setState({resetMenu: true, ordersInARow:[]}, () => {
         this.setState({resetMenu: false});
     });
@@ -95,7 +95,7 @@ export class PlaceOrder extends Component {
         && this.state.orderedItems.length > 0;
   }
 
-  checkOut = () => {  
+  checkOut = () => {
     this.props.checkOut(this.state.ordersInARow); // passing an array of 1 or 2 orders
     if(this.state.ordersInARow.length === 1){
         this.clearOrder();
@@ -111,10 +111,14 @@ export class PlaceOrder extends Component {
     if(this.areValidInputs()){
         // second order in a row
         this.addOrder(this.state.ordersInARow);
-        this.checkOut();
-        // prevent memory overflow
-        clearInterval(this.updateOrderRemainingTime);
-        this.props.onClose();
+        this.checkOut()
+        this.setState(initialState, () => {
+            this.setState({ordersInARow:[]}, () => { // reset ordersInARow to prevent interval delays 1s before stop
+                // prevent memory overflow
+                clearInterval(this.updateOrderRemainingTime);
+                this.props.onClose(); 
+            })
+        })
     } else {
         alert("Invalid inputs. Can't finalize this order.")
         return;

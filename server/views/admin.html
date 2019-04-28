@@ -14,7 +14,6 @@
             <th>User Type</th>
             <th>User ID</th>
             <th>User Name</th>
-            <th>Address (if available)</th>
             <th>Phone Numbers</th>
             <th>Email</th>
             <th>Approved?</th>
@@ -22,16 +21,15 @@
         <%
             listOfUsers.map((row, i) => { %>
                 <tr>
-                    <td><%= i %></td>
+                    <td><%= (i + 1) %></td>
                     <td><%= new Date(row.submittedDate).toLocaleString("en-US") %></td>
                     <td><%= row.userType %></td>
                     <td><%= row.userId %></td>
                     <td><%= row.userName %></td>
-                    <td><%= row.address %></td>
                     <td><%= row.phoneNumber %></td>
                     <td><%= row.email %></td>
                     <td><% if(row.approved === 0) { %>
-                            <button>Approve</button>
+                            <a href="/approve/<%=row.userId%>">Approve</a>
                         <% } else { %>
                             <label>Approved</label>
                         <% } %></td>

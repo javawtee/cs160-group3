@@ -6,11 +6,11 @@ export class Direction extends Component {
     return (
       <DirectionsMaker
         id="myMap"
-		id2="myDirections"
-		sourceLat={37.76}
+        id2="myDirections"
+        sourceLat={37.76}
         sourceLng={-122.40}
-		destLat={37.7749}
-		destLng={-122.4194}
+        destLat={37.7749}
+        destLng={-122.4194}
         options={{
           center: { lat: 12.85, lng: -54.65 },
           zoom: 3

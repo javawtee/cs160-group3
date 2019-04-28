@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { render } from 'react-dom';
 
 class DirectionsMaker extends Component {
   constructor(props) {
@@ -8,16 +7,14 @@ class DirectionsMaker extends Component {
   }
 
   onScriptLoad() {
-	const directionsDisplay = new window.google.maps.DirectionsRenderer;
+    const directionsDisplay = new window.google.maps.DirectionsRenderer;
     const directionsService = new window.google.maps.DirectionsService;
-    const map = new window.google.maps.Map(
-      document.getElementById(this.props.id),
-      this.props.options);
-	directionsDisplay.setMap(map);
+    const map = new window.google.maps.Map(document.getElementById(this.props.id), this.props.options);
+    directionsDisplay.setMap(map);
     directionsDisplay.setPanel(document.getElementById(this.props.id2));
-	var chicago = new window.google.maps.LatLng(this.props.sourceLat, this.props.sourceLng);
+    var chicago = new window.google.maps.LatLng(this.props.sourceLat, this.props.sourceLng);
     var sf = new window.google.maps.LatLng(this.props.destLat, this.props.destLng);
-	directionsService.route({
+    directionsService.route({
           origin: chicago,
           destination: sf,
           travelMode: 'DRIVING'
@@ -50,10 +47,10 @@ class DirectionsMaker extends Component {
 
   render() {
     return (
-	<div>
-      <div style={{ width: 500, height: 500 }} id={this.props.id} />
-	  <div style={{ width: 500, height: 500 }} id={this.props.id2} />
-	</div>
+    <div>
+        <div style={{ width: 500, height: 500 }} id={this.props.id} />
+        <div style={{ width: 500, height: 500 }} id={this.props.id2} />
+    </div>
     );
   }
 }
