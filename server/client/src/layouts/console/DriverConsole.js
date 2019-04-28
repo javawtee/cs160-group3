@@ -36,17 +36,33 @@ export class DriverConsole extends Component {
   }
 
   getCurrentLocation = (callback) => {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        var latitude = position.coords.latitude;
-        var longitude = position.coords.longitude;
-        if(callback !== undefined){
-          callback(latitude, longitude); // destination is used to open driver navigation
-        }
+    // not supported without https
+    // navigator.geolocation.getCurrentPosition(
+    //   (position) => {
+    //     var latitude = position.coords.latitude;
+    //     var longitude = position.coords.longitude;
+    //     if(callback !== undefined){
+    //       callback(latitude, longitude); // destination is used to open driver navigation
+    //     }
+    //   },
+    //   (error) => alert(error),
+    //   { enableHighAccuracy: false, timeout: 200000, maximumAge: 1000 },
+    // );
+    fetch("https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyAo-8nuqyyTuQI1ALVFP4aWsY-BisShauI",{
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
       },
-      (error) => alert(error),
-      { enableHighAccuracy: false, timeout: 200000, maximumAge: 1000 },
-    );
+    })
+    .then(res => res.json())
+    .then(data => {
+      var latitude = data.location.lat;
+      var longitude = data.location.lng;
+      if(callback !== undefined){
+        callback(latitude, longitude); // destination is used to open driver navigation
+      }
+    })
   }
 
   handleStartStop = (e) => {
