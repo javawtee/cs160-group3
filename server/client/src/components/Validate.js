@@ -31,7 +31,7 @@ class Validate {
   }
 
   validPassword = (value) => {
-    return value.length > 6 && zxcvbn(value).score > 1; 
+    return value.length > 6 && zxcvbn(value).score > 0; 
   }
 
   validConfirmPassword = (original, confirm) => {

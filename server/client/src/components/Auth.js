@@ -23,16 +23,20 @@ class Auth {
 
 function getToken(userInfo){
     const { uuid, userName, userType, address, phoneNumber, email, approvedDate} = userInfo;
-    var aToken = JSON.stringify({
+    var aToken = {
         uuid,
         userName,
         userType,
-        address:"null",
+        address,
         phoneNumber,
         email,
         approvedDate, // joined date
-    }); // aToken is a JSON string
-    return aToken;
+    }; 
+    if(userType === "driver"){ // used with START/STOP button
+        aToken.started = false;
+        aToken.delivering = false;
+    }
+    return JSON.stringify(aToken); // aToken is a JSON string
 }
 
 export default new Auth()

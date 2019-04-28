@@ -25,6 +25,15 @@ app.get("/", (req,res) => {
   .then(listOfUsers => res.render("admin", {listOfUsers}));
 })
 
+app.get("/approve/:userId", (req, res) => {
+  require("./api/connector").query("UPDATE users SET approved=1,approvedDate=NOW() WHERE userId=?",[req.params.userId], (err) => {
+    if(err){console.log(err); throw err;}
+    else {
+        res.redirect("/");
+    }
+})
+})
+
 // send email
 app.post("/mailer", (req,res) => {
   const {to, subject, content} = req.body;
@@ -35,6 +44,7 @@ app.post("/mailer", (req,res) => {
 // get any url start with /user and match the router.get/post/..whatever
 app.use("/user", require("./api/user"));
 app.use("/restaurant", require("./api/restaurant"));
+app.use("/driver", require("./api/driver"));
 
 //----------------------------------------------------------------
 

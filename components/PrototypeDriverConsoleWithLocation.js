@@ -14,7 +14,7 @@ export class DriverConsole extends Component {
   handleStartStop(e){
     e.preventDefault();
     this.setState((prevState) => ({started: !prevState.started}));
-	navigator.geolocation.getCurrentPosition(
+	  navigator.geolocation.getCurrentPosition(
        (position) => {
 		   var latitude = position.coords.latitude;
 		   var longitude = position.coords.longitude;
@@ -28,7 +28,7 @@ export class DriverConsole extends Component {
             body: JSON.stringify({latitude,longitude})
           })
        },
-       (error) => alert("error"),
+       (error) => alert(error),
        { enableHighAccuracy: false, timeout: 200000, maximumAge: 1000 },
      );
   }

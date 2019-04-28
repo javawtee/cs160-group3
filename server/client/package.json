@@ -8,8 +8,9 @@
     "react": "^16.8.3",
     "react-dom": "^16.8.3",
     "react-router-dom": "^4.3.1",
-    "react-scripts": "2.1.5",
+    "react-scripts": "^3.0.0",
     "uuid": "^3.3.2",
+    "ws": "^6.2.1",
     "zxcvbn": "^4.4.2"
   },
   "scripts": {
