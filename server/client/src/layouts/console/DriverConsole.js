@@ -149,11 +149,22 @@ export class DriverConsole extends Component {
 
   openDriverNavigation = (e) => {
     e.preventDefault();
-    var destination = e.target.name;
-    // get current position of driver
-    this.getCurrentLocation((latitude, longitude) => {
-      var currentLocation = {latitude, longitude};
-      this.setState({currentLocation, destination, openDriverNavigation: true});
+    // geocode string address to lat,long
+    fetch("https://maps.googleapis.com/maps/api/geocode/json" +
+            "?address=" + e.target.name +
+            "&key=AIzaSyAo-8nuqyyTuQI1ALVFP4aWsY-BisShauI")
+    .then(res => res.json())
+    .then(payload => {
+      if(payload.results.length > 0){
+        var latitude = payload.results[0].geometry.location.lat;
+        var longitude = payload.results[0].geometry.location.lng;
+        var destination = {latitude, longitude};
+        // get current position of driver
+        this.getCurrentLocation((latitude, longitude) => {
+          var currentLocation = {latitude, longitude};
+          this.setState({currentLocation, destination, openDriverNavigation: true});
+        })
+      }
     })
   }
 

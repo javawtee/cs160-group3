@@ -118,13 +118,13 @@ class UserManager {
         ]*/
         // {deliveryDetails:{restaurant:{name, address, , geocode:{latitude, longitude}}, orders:[{order1, order2}]}}
         this.pendingOrders = [
-            {
-                restaurant:{name:"a restaurant",
-                                address:"Newpark mall, newark, 94560",
-                                    geocode:{latitude:37.523262,longitude:-122.006422}},
-                orders:[{customerName:"THONG HOANG LE",customerAddress:"2957 Bowery Lane",customerPhone:"4084428953",
-                        orderedItems:[{category:"Hot food",id:1,name:"Hot Food 1",price:"1.99",amount:"5"}],id:1}]
-            }
+            // {
+            //     restaurant:{name:"San Pedro Square Market",
+            //                     address:"87 N San Pedro St, San Jose, CA 95110",
+            //                         geocode:{latitude:37.3365,longitude:121.8943}},
+            //     orders:[{customerName:"THONG HOANG LE",customerAddress:"2957 Bowery Lane",customerPhone:"4084428953",
+            //             orderedItems:[{category:"Hot food",name:"Hot Food 1",price:"1.99",amount:"5"}], id:12}]
+            // }
         ]
     }
 
@@ -182,6 +182,7 @@ class UserManager {
     }
 
     addDeliveringDriver(driver){ // driver = {uuid, deliveryDetails:{restaurant:{name, address}, orders:[{order1, order2}]}}
+        this.deliveringDrivers.push(driver);
         // ---- persist data : update driver id to order driver_id
         this.getOnlineUsers(driver.uuid).then(res => {
             var driver_id = res.id;
@@ -194,9 +195,6 @@ class UserManager {
             }
             connection.query(query, values, (err) => {
                 if(err) {console.log(err); throw err}
-                else {
-                    this.deliveringDrivers.push(driver);
-                }
             })
         })
     }
@@ -223,11 +221,11 @@ class UserManager {
     updateDeliveryStatus(deliveryDetails, deliveryStatus){ // deliveryDetails.map() is used when driver accepted 2 orders
         deliveryDetails.orders.map(order => {
             // look for restaurant_uuid by using address, skipping validation for now
-            var uuid = this.onlineUsers.filter(user => user.address === deliveryDetails.restaurant.address)[0];
-            console.log(uuid);
+            var uuid = this.onlineUsers.filter(user => user.address === deliveryDetails.restaurant.address)[0].uuid;
+            console.log("uuid " + uuid);
             this.tobeNotifiedRestaurants.push({
                 uuid,
-                orderId: order.id,
+                id: order.id,
                 deliveryStatus,
             })
             // ---- persist data: update order.deliveryStatus

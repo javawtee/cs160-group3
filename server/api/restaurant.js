@@ -85,6 +85,7 @@ router.post("/add-orders", (req, res) => {
                     order.id = insertedId;
                     insertedId++;
                 })
+                deliveryDetails.orders = orders;
                 UserManager.addPendingOrder(deliveryDetails, false); // this is new order, never been rejected (false) by driver
                 res.json(orders) // updated order ids for new inserted in client-side
             }

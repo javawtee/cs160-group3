@@ -45,6 +45,7 @@ export class RestaurantConsole extends Component {
         ws.onmessage = (e) => {
           var res = JSON.parse(e.data);
           if(res.uuid === restaurant_uuid){
+            // res = {uuid, id, deliveryStatus}
             var newUpdatedOrders = this.state.orders;
             // update delivery status
             newUpdatedOrders.map(order => { if(order.id === res.id) order.deliveryStatus = res.deliveryStatus; })
@@ -81,7 +82,7 @@ export class RestaurantConsole extends Component {
       .then(payload => {
         if(payload.results.length > 0){
           var latitude = payload.results[0].geometry.location.lat;
-          var longitude = payload.results[0].geometry.location.lng;
+          var longitude = payload.results[0].geometry.location.lng; // don't know why it returns -
           var geocode = {latitude, longitude};
           var session = JSON.parse(sessionStorage.getItem("user-token"));
           session.geocode = geocode;

@@ -5,8 +5,8 @@ export class Direction extends Component {
   // convert destination (straight address) to lat,long
   constructor(props){
     super(props);
-    this.origin = this.props.origin || {latitude: 37.529659, longitude: -122.040237};
-    this.destination = this.props.destination || {latitude: 37.5263, longitude: -122.0027};
+    this.origin = this.props.origin
+    this.destination = this.props.destination
   }
 
   render() {
