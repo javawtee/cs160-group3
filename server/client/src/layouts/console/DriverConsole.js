@@ -72,7 +72,7 @@ export class DriverConsole extends Component {
       this.getCurrentLocation((latitude, longitude) => {
         var currentLocation = {latitude, longitude};
         this.setState({currentLocation}, () => {
-          var ws= new WebSocket("ws://3.87.213.235:5001/driver")
+          var ws= new WebSocket("ws://localhost:5001/driver")
           ws.onopen = () => {
             const {currentLocation} = this.state;
             var clientMetaData = {
@@ -85,7 +85,7 @@ export class DriverConsole extends Component {
           ws.onmessage = (e) => {
             // receiving order request
             var request = JSON.parse(e.data);
-            if(request.uuid === driver_uuid){
+            if(request.message === undefined && request.uuid === driver_uuid){
               // request for this driver
               var deliverySummary = this.summarizeDelivery(request.deliveryDetails)
               this.setState({deliveryDetails: request.deliveryDetails, deliverySummary, openDriverIncomingRequest: true})
@@ -130,8 +130,15 @@ export class DriverConsole extends Component {
       var {driver_uuid, deliveryDetails} = this.state;
       if(!accepted){
         // return order to server
-        this.state.ws.send(JSON.stringify({action: "rejected", deliveryDetails}));
-        this.setState({deliveryDetails: {}, deliverySummary: {}});
+        this.getCurrentLocation((latitude, longitude) => {
+          var currentLocation = {latitude, longitude};
+          var driver = {
+            uuid: driver_uuid,
+            location: currentLocation,
+          }
+          this.state.ws.send(JSON.stringify({action: "rejected", driver, deliveryDetails}));
+          this.setState({deliveryDetails: {}, deliverySummary: {}});
+        })
       } else {
         // accepted, update delivery status for order(s)
         this.state.ws.send(JSON.stringify({action: "accepted", uuid: driver_uuid, deliveryDetails}));
@@ -156,6 +163,7 @@ export class DriverConsole extends Component {
 
   deliveredOrder = (id) => {
     var orders = this.state.deliveryDetails.orders.filter(order => order.id === id);
+    console.log(orders);
     var deliveryDetails = {
       restaurant: this.state.deliveryDetails.restaurant,
       orders
@@ -164,11 +172,13 @@ export class DriverConsole extends Component {
     deliveryDetails.orders = this.state.deliveryDetails.orders.filter(order => order.id !== id);
     this.setState({deliveryDetails}, () => {
       if(this.state.deliveryDetails.orders.length === 0){
+        // driver is not delivering
+        this.state.ws.send(JSON.stringify({action:"finished-delivery", uuid: this.state.driver_uuid}));
         this.setState({delivering: false, deliveryDetails: {}, deliverySummary: {}}, () => {
             // driver becomes available
             this.getCurrentLocation((latitude, longitude) => {
               var location = {latitude, longitude};
-              this.state.ws.send(JSON.stringify({action:"start", uuid: this.state.driver_uuid, location}))
+              this.state.ws.send(JSON.stringify({action:"start", uuid: this.state.driver_uuid, location}));
             })
         });
       }

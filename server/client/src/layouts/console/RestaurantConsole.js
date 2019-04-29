@@ -40,35 +40,34 @@ export class RestaurantConsole extends Component {
 
     if(this.state.ws === null){
       // ws = null => user refreshed page, ws set back to null
-      this.setState({ws: new WebSocket("ws://3.87.213.235:5002/restaurant")}, () => {
+      this.setState({ws: new WebSocket("ws://localhost:5002/restaurant")}, () => {
         const ws = this.state.ws;
         ws.onmessage = (e) => {
-          var update = JSON.parse(e.data);
-          if(update.uuid === restaurant_uuid){
+          var res = JSON.parse(e.data);
+          if(res.uuid === restaurant_uuid){
             var newUpdatedOrders = this.state.orders;
             // update delivery status
-            newUpdatedOrders.filter(order => order.id === update.id)[0].deliveryStatus = update.deliveryStatus;
+            newUpdatedOrders.map(order => { if(order.id === res.id) order.deliveryStatus = res.deliveryStatus; })
             this.setState({orders: newUpdatedOrders})
           }
-          // ---- MESSAGE FROM TRACKER FOR DRIVER's LOCATION
-          var res = JSON.parse(e.data);
+          // ---- TRACKER FOR DRIVER's LOCATION
           if(res.message !== undefined && res.message !== "failed"){
-            var driverLocation = res.driverLocation;
-            console.log(this.state.orders.filter(order => order.id === res.id))
-            var customerAddress = "Lion Supermarket, Newark, CA 94560";
-            // geocode destination / customer address
-            fetch("https://maps.googleapis.com/maps/api/geocode/json" +
-                "?address=" + customerAddress +
-                "&key=AIzaSyAo-8nuqyyTuQI1ALVFP4aWsY-BisShauI")
-            .then(res => res.json())
-            .then(payload => {
-              if(payload.results.length > 0){
-                var latitude = payload.results[0].geometry.location.lat;
-                var longitude = payload.results[0].geometry.location.lng;
-                var destination = {latitude, longitude};
-                this.setState({driverLocation, destination});
-              }
-            })
+            // var driverLocation = res.driverLocation;
+            // console.log(this.state.orders.filter(order => order.id === res.id))
+            // var customerAddress = "Lion Supermarket, Newark, CA 94560";
+            // // geocode destination / customer address
+            // fetch("https://maps.googleapis.com/maps/api/geocode/json" +
+            //     "?address=" + customerAddress +
+            //     "&key=AIzaSyAo-8nuqyyTuQI1ALVFP4aWsY-BisShauI")
+            // .then(res => res.json())
+            // .then(payload => {
+            //   if(payload.results.length > 0){
+            //     var latitude = payload.results[0].geometry.location.lat;
+            //     var longitude = payload.results[0].geometry.location.lng;
+            //     var destination = {latitude, longitude};
+            //     this.setState({driverLocation, destination});
+            //   }
+            // })
           }
         }
       });
@@ -92,7 +91,7 @@ export class RestaurantConsole extends Component {
       })
     }
 
-    // prevent from losing not checked-out order
+    // prevent from losing order not checked out
     if(JSON.parse(sessionStorage.getItem("ordersInARow")) !== null){
       if(JSON.parse(sessionStorage.getItem("ordersInARow")).length > 0){
         this.setState({openPlaceOrder: true});
@@ -116,8 +115,10 @@ export class RestaurantConsole extends Component {
 
   openDriverNavigation = (e) => {
     e.preventDefault();
-    var id = Number(e.target.name); // id as order_id
-    this.state.ws.send(JSON.stringify({id}));
+    if(!e.target.name){
+      var id = Number(e.target.name); // id as order_id
+      this.state.ws.send(JSON.stringify({id}));
+    }
     this.setState({openDriverNavigation: true});
   }
 
@@ -126,7 +127,6 @@ export class RestaurantConsole extends Component {
   }
 
   checkOut = (orders) => { // orders is an array of JSON strings
-    const newOrders = this.state.orders;
     const restaurant_uuid = this.state.restaurant_uuid;
     const name = JSON.parse(sessionStorage.getItem("user-token")).userName; // restaurant's name; can't be null
     const address = JSON.parse(sessionStorage.getItem("user-token")).address; // restaurant's address; can't be null
@@ -135,8 +135,6 @@ export class RestaurantConsole extends Component {
     orders.map(order => {
       // add new property `deliveryStatus` to order
       order.deliveryStatus = 0; // 0 means looking for driver
-      // store records in front-end
-      newOrders.push(order)
     });
 
     var deliveryDetails = {
@@ -158,13 +156,17 @@ export class RestaurantConsole extends Component {
       body: JSON.stringify({restaurant_uuid, deliveryDetails})
     })
     .then(res => res.json())
-    .then(payload => {
-      if(payload === "failed"){
+    .then(res => { // res as "failed" or orders
+      if(typeof(res) === "string"){ // failed
         alert("Web Server is down")
+      } else {
+        var addedOrders = res; // added orders with inserted id's
+        var temp = this.state.orders;
+        // store records in client-side
+        addedOrders.map(addedOrder => temp.push(addedOrder));
+        this.setState({orders: temp});
       }
     })
-
-    this.setState({orders: newOrders});
   }
 
   renderOrders = () => {
@@ -189,13 +191,15 @@ export class RestaurantConsole extends Component {
           return "Looking for driver";
         case 1:
           return <a name={orderId} href="/ghost-link" onClick={this.openDriverNavigation}>Delivering</a>
+        case 2:
+          return "DELIVERED"
         default:
           return "error";
       }
     }
     
     const orderList = this.state.orders.map((order, id) =>
-        <div className="row" key={order.id}>
+        <div className="row" key={id}>
           <div className="col-1 border ">{id + 1}</div>
           <div className="col-2 border text-left">{order.customerName}</div>
           <div className="col-2 border text-left">{order.customerPhone}</div>

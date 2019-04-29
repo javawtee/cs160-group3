@@ -52,10 +52,6 @@ router.post("/today", (req, res) => {
                                 WHERE restaurant_id=${info.id} AND DAY(order_date)=DAY(NOW())`, (err,rows) => {
                 if(err) {console.log(err);res.json(err)}
                 else {
-                    if(rows.length > 0){
-                        //prepare orderedItems to correct format
-                        
-                    }
                     var payload = {
                         numOfResults: rows.length,
                         rows
@@ -90,6 +86,7 @@ router.post("/add-orders", (req, res) => {
                     insertedId++;
                 })
                 UserManager.addPendingOrder(deliveryDetails, false); // this is new order, never been rejected (false) by driver
+                res.json(orders) // updated order ids for new inserted in client-side
             }
         })
     }).catch(err => console.log(err));
