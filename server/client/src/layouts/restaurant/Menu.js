@@ -7,7 +7,7 @@ const initialMenu = (initialAmount) => {
         {
             category: "Hot food",
             id: 1, 
-            name: "Hot Food 1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaannnnnbaswweertt",
+            name: "Hot Food 1",
             price: "1.99",
             amount: initialAmount,
         },
