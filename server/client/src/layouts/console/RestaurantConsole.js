@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import RestaurantInfo from "../forms/RestaurantInfo";
 import MapContainer from "../MapContainer";
+import OrderInfo from "../OrderInfo";
 
 export class RestaurantConsole extends Component { 
   state = { 
-    numItems: 1
+    numItems: 1,
+    openOrderInfo: false,
   }
 
 
@@ -14,7 +16,6 @@ export class RestaurantConsole extends Component {
       numItems: this.state.numItems + 1
     });  
   }
-
   renderItemFields = () => {
     let fields = [];
 
@@ -35,12 +36,32 @@ export class RestaurantConsole extends Component {
 
     return fields;
   }
+
+
+  handleOrderInfoOpen = (e) => {
+    e.preventDefault();
+    this.setState({openOrderInfo: true});
+  }
+  
+  handleOrderInfoClose = () => {
+    console.log("clear session");
+    this.setState({openOrderInfo: false});
+  }
   
   render () {                                    
     return (
       <div>
         <div>
           <div id='restaurantContainer'>
+
+            {/*<button className="btn btn-primary" onClick={this.handleOrderInfoOpen}>Place order</button>
+
+            <OrderInfo open={this.state.openOrderInfo} 
+                onClose={this.handleOrderInfoClose} />*/}
+
+
+
+
             {/*<div id='home-common-div'>
               <p>This is the restaurant view</p>
             </div>
@@ -52,6 +73,8 @@ export class RestaurantConsole extends Component {
             <button id='submit'>Place orders</button>*/}
 
             <RestaurantInfo />
+
+
 
             <MapContainer />
 

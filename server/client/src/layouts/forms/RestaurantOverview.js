@@ -15,7 +15,7 @@ export class RestaurantOverview extends Component {
 
 
   showTime = () => {
-    return <p>Monday 8:00am - 9:00 pm</p> 
+    return <p>Monday 8:00am - 9:00 pm ▼</p> 
   }
 
   showAllTime = () => {
@@ -38,12 +38,15 @@ export class RestaurantOverview extends Component {
     return (
       <div>
         <p>Classic, long-running fast-food chain known for its burgers, fries & shakes.</p>
-        <p>Late-night food · Breakfast · Quick bite</p><br/>
-        <p><img src="http://www.sclance.com/pngs/location-symbol-png/./location_symbol_png_811020.png" width="20" height="20" />
+        <p>Late-night food · Breakfast · Quick bite</p>
+
+        <hr width="95%"/>
+
+        <p><img src="https://cdn4.iconfinder.com/data/icons/pictype-free-vector-icons/16/location-alt-512.png" width="20" height="20" />
            2850 Augustine Dr, Santa Clara, CA 95054
         </p>
 
-  
+        <hr width="95%"/>
 
         <p><img src="https://image.flaticon.com/icons/png/512/44/44631.png" width="17" height="17" />  Hours Open:</p>
         <div onClick= {() => this.setState({clicked: !this.state.clicked})}>
