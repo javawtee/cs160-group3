@@ -61,12 +61,6 @@ Link, a {
   padding: 2%;
 }
 
-.editable-tr{
-  background: #a4a5aa;
-  color: #000;
-  padding: 10% 0 10% 10%;
-}
-
 /* avoid scroll in dialog */
 .MuiDialog-paper-5, .MuiDialog-paper-40, .MuiDialog-paper-33, .MuiDialog-paper-82{
   overflow-x: hidden !important;
@@ -74,4 +68,8 @@ Link, a {
 
 td input{
   width: 40%;
+}
+
+.user-table td {
+  padding: 0.5vh 1vw;
 }

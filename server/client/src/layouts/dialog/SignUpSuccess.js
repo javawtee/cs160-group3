@@ -12,7 +12,7 @@ export class SignUpSuccess extends Component {
                     <hr/>
                     <div>
                         Your form will be reviewed soon...<br/>
-                        If it is approved, you will be notified via your registered email<br/>
+                        Upon its approval, you will be notified via your registered email<br/>
                         and your account is eligible to login
                     </div>
                 </div>

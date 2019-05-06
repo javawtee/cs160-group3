@@ -70,9 +70,8 @@ export class Menu extends Component {
         this.state = initialMenu(0);
     }
 
-    componentWillReceiveProps = () => {
-        //console.log("asdf " + this.props.resetMenu);
-        if(this.props.resetMenu){
+    componentWillReceiveProps = nextProps => {
+        if(nextProps.resetMenu === true){
             this.setState(initialMenu(0))
         }
     }
@@ -80,7 +79,12 @@ export class Menu extends Component {
     updateOrder = (e) => {
         const newMenu = this.state.menu;
         const targetId = Number(e.target.id) -1;
+        var temp = newMenu[targetId].amount; // save to restore valid amount while invalid inputs
         newMenu[targetId].amount = e.target.value;
+        if(isNaN(e.target.value)){
+            alert(`Invalid input: '${e.target.value}'. Must be a number`);
+            newMenu[targetId].amount = temp;
+        }
         this.setState({menu: newMenu})
         this.props.updateOrder(newMenu[targetId]);
     }

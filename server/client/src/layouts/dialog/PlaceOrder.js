@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+
+import Validate from "../../components/Validate";
+import LocationSearchInput from "../../components/LocationSearchInput";
 import { withStyles } from '@material-ui/core/styles';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import {Dialog,TextField} from "@material-ui/core";
@@ -38,12 +41,14 @@ const initialState = {
     customerName: "",
     customerPhone: "",
     customerAddress: "",
-    cardNumber: "1234 4321 1234 4321",
-    cardExpiration: "12/99",
-    cardCCV: "123",
+    cardNumber: "",
+    cardExpirationM: "",
+    cardExpirationY: "",
+    cardCCV: "",
     orderedItems:[],
     ordersInARow: JSON.parse(sessionStorage.getItem("ordersInARow")) || [], // place maximum 2 orders at a time
-    resetMenu: false,
+    reset: false,
+    errors:[],
 };
 
 export class PlaceOrder extends Component {
@@ -60,7 +65,7 @@ export class PlaceOrder extends Component {
       if(nextProps.open && sessionStorage.getItem("ordersInARow") === null){
         console.log("created session");
         sessionStorage.setItem("ordersInARow", JSON.stringify([]));
-        this.setState(initialState, () => this.setState({resetMenu: false, orderedItems:[], ordersInARow:[]}));
+        this.setState(initialState, () => this.setState({reset: false, orderedItems:[], ordersInARow:[]}));
       }
   }
 
@@ -83,16 +88,28 @@ export class PlaceOrder extends Component {
   // clear pending or successful order
   clearOrder = () => {
     sessionStorage.setItem("ordersInARow", JSON.stringify([]))
-    this.setState({resetMenu: true, ordersInARow:[]}, () => {
-        this.setState({resetMenu: false});
+    this.setState({reset: true, ordersInARow:[]}, () => {
+        this.setState({reset: false});
     });
   }
 
   areValidInputs = () => {
-      return this.state.customerName !== "" 
-        && this.state.customerAddress !== "" 
-        && this.state.customerPhone !== "" 
-        && this.state.orderedItems.length > 0;
+      var errors = this.state.errors;
+      errors[0] = !Validate.notEmpty(this.state.customerName); // true: not empty => error = false
+      errors[1] = errors[1] || !Validate.notEmpty(this.state.customerAddress); // true: not empty => error = false
+      errors[2] = !Validate.validUSPhoneNumberFormat(this.state.customerPhone); // true: valid => error = false
+      errors[3] = this.state.cardNumber.length < 16;
+      errors[4] = this.state.cardExpirationY.length < 1 || Number(this.state.cardExpirationM) > 12 || Number(this.state.cardExpirationM) < 1;
+      var thisYear = Number((new Date()).getFullYear().toString().substring(2));
+      errors[5] = this.state.cardExpirationY.length < 2 || Number(this.state.cardExpirationY) < thisYear ;
+      if(Number(this.state.cardExpirationY) === thisYear){
+        var thisMonth = (new Date()).getMonth() + 1; // getMonth : 0 - 11
+        errors[4] = errors[4] || Number(this.state.cardExpirationM) < thisMonth;
+      }
+      errors[6] = this.state.cardCCV.length < 3;
+      if(errors.filter(error => error === true).length > 0 || this.state.orderedItems.length < 1) // has any error, stop submitting
+        this.setState({errors}, () => {return false});
+      else return true;
   }
 
   checkOut = () => {
@@ -103,7 +120,33 @@ export class PlaceOrder extends Component {
   }
 
   handleOnChange = (e) => {
-      this.setState({[e.target.name]: e.target.value})
+    var newErrors = this.state.errors;
+    switch(e.target.name){
+        case "customerName":
+          newErrors[0] = false;
+          break;
+        case "customerAddress":
+          newErrors[1] = false;
+          break;
+        case "customerPhone":
+          newErrors[2] = false;
+          break;
+        case "cardNumber":
+          newErrors[3] = false;
+          break;
+        case "cardExpirationM":
+          newErrors[4] = false;
+          break;
+        case "cardExpirationY":
+          newErrors[5] = false;
+          break;
+        case "cardCCV":
+          newErrors[6] = false;
+          break;
+        default:
+          break;
+    }
+    this.setState({[e.target.name]: e.target.value, errors:newErrors})
   }
 
   handleSubmit = (e) => {
@@ -126,32 +169,27 @@ export class PlaceOrder extends Component {
   }
 
   updateOrder = (item) => {
-    const newOrderedItems = this.state.orderedItems;
-    if(newOrderedItems.length === 0){ // empty list
-        if(item.amount > 0){
-            newOrderedItems.push(item);
-            this.setState({orderedItems: newOrderedItems});
+    var newOrderedItems = this.state.orderedItems;
+    var temp = newOrderedItems.filter(orderedItem => orderedItem.id === item.id);
+    if(temp.length > 0){
+        if(Number(item.amount) === 0){
+            // remove orderedItem with amount 0
+            var nonZeroAmount = newOrderedItems.filter(orderedItem => Number(orderedItem.amount) !== 0);
+            newOrderedItems = []
+            nonZeroAmount.forEach(nonZero => {
+                newOrderedItems.push(nonZero);
+            })
+        } else {
+            var orderedItem = temp[0]; // there is only one item with a specific id
+            orderedItem.amount = item.amount;
         }
     } else {
-        var set = false;
-        newOrderedItems.map((orderedItem,id) => {
-            if(item.id === orderedItem.id){
-                orderedItem.amount = item.amount;
-                if(Number(orderedItem.amount) === 0){
-                    newOrderedItems.splice(id, 1);
-                }
-                this.setState({orderedItems: newOrderedItems});
-                set = true;
-            }
-        })
-        if(!set){
-            // item doesn't exist
-            if(item.amount > 0){
-                newOrderedItems.push(item);
-                this.setState({orderedItems: newOrderedItems});
-            }
+        // item doesn't exist
+        if(item.amount > 0){
+            newOrderedItems.push(item);
         }
     }
+    this.setState({orderedItems: newOrderedItems});
   }
 
   renderOrderedItems = () => {
@@ -173,7 +211,7 @@ export class PlaceOrder extends Component {
 
     const getTotal = () => {
         var total = 0;
-        this.state.orderedItems.map(item => {
+        this.state.orderedItems.forEach(item => {
             total = total + Number((item.amount * item.price).toFixed(2));
         })
         return total.toFixed(2);
@@ -226,18 +264,16 @@ export class PlaceOrder extends Component {
     }
 
     if(this.areValidInputs()){
-        window.scrollTo(0,0);
-
         this.addOrder(temp);
 
         const customizedInitialState = initialState;
-        customizedInitialState.resetMenu = true;
+        customizedInitialState.reset = true;
         customizedInitialState.orderedItems = [];
         customizedInitialState.ordersInARow = temp;
 
         this.setState(customizedInitialState, () => {
-            // prevent reset after menu is resetted
-            this.setState({resetMenu: false})
+            // prevent resetting again
+            this.setState({reset: false})
         });
     } else {
         alert("Invalid inputs. Can't finalize this order");
@@ -245,8 +281,8 @@ export class PlaceOrder extends Component {
     }
   }
 
-  addOrder = (ordersInARow) => {
-    const {customerName, customerPhone, customerAddress, orderedItems } = this.state; 
+  addOrder = ordersInARow => {
+    const {customerName, customerPhone, customerAddress, orderedItems } = this.state;
     ordersInARow.push({
         customerName,
         customerAddress,
@@ -255,6 +291,34 @@ export class PlaceOrder extends Component {
         remainingTime: 60, // automatically request delivery after 60 seconds
     });
     sessionStorage.setItem("ordersInARow", JSON.stringify(ordersInARow));
+  }
+
+  toggleError = (inputIndex) => {
+    return {
+      borderColor: this.state.errors[inputIndex] || (inputIndex === 0 && this.state.isDuplicate) ? "red" : "#ced4da",
+    }
+  }
+
+  toggleTextError = (inputIndex) => {
+      return {
+          display: this.state.errors[inputIndex] ? "block" : "none",
+      }
+  }
+
+  setAddress = (data) => { // data:{result:"success", address}
+    if(data.result !== undefined){
+      var newErrors = this.state.errors;
+      if(data.result === "success"){
+        console.log("In permitted range");
+        newErrors[1] = false;
+        this.setState({errors: newErrors, customerAddress: data.address});
+      }
+      else{
+        //alert("Out of permitted range (take more than 30 minutes to deliver)");
+        newErrors[1] = true;
+        this.setState({errors: newErrors})
+      }
+    }
   }
 
   render() {
@@ -284,19 +348,33 @@ export class PlaceOrder extends Component {
                                 <div className="row">
                                     <div className="col-3 pt-1">Name: </div>
                                     <div className="col-8">
-                                        <TextField name="customerName" value={this.state.customerName} onChange={this.handleOnChange} fullWidth />
+                                        <input style={this.toggleError(0)} className="form-control" 
+                                            name="customerName" value={this.state.customerName} onChange={this.handleOnChange}/>
+                                        <small style={this.toggleTextError(0)} className="input-error form-text text-muted">
+                                            Customer name cannot be empty
+                                        </small>
                                     </div>
                                 </div>
                                 <div className="row">
                                     <div className="col-3 pt-1">Address: </div>
                                     <div className="col-8">
-                                        <TextField name="customerAddress" value={this.state.customerAddress} onChange={this.handleOnChange} fullWidth/>
+                                        {/* <input style={this.toggleError(1)} className="form-control"
+                                            name="customerAddress" value={this.state.customerAddress} onChange={this.handleOnChange}/> */}
+                                        <LocationSearchInput toggleError={this.toggleError(1)} 
+                                                            setAddress={this.setAddress} resetPlaceOrder={this.state.reset}/>
+                                        <small style={this.toggleTextError(1)} className="input-error form-text text-muted">
+                                            Invalid address or out of service range
+                                        </small>
                                     </div>
                                 </div>
                                 <div className="row">
                                     <div className="col-3 pt-1">Phone #: </div>
                                     <div className="col-8">
-                                        <TextField name="customerPhone" value={this.state.customerPhone} onChange={this.handleOnChange} fullWidth/>
+                                        <input style={this.toggleError(2)} className="form-control"
+                                            name="customerPhone" value={this.state.customerPhone} onChange={this.handleOnChange}/>
+                                        <small style={this.toggleTextError(2)} className="input-error form-text text-muted">
+                                            Empty or US phone number format is not regconized. Format: 123-123-4567 or 1231234567
+                                        </small><br/>
                                     </div>
                                 </div>
                                 <div className="row mt-3">
@@ -325,26 +403,40 @@ export class PlaceOrder extends Component {
                                         <div className="row">
                                             <div className="col-4 pt-1">Card number: </div>
                                             <div className="col-8">
-                                                <TextField name="cardNumber" value={this.state.cardNumber} readOnly/>
+                                                <input className="form-control" style={this.toggleError(3)} name="cardNumber" maxLength="16"
+                                                    value={this.state.cardNumber} onChange={this.handleOnChange}/>
+                                                <small style={this.toggleTextError(3)} className="input-error form-text text-muted">
+                                                    Invalid card number
+                                                </small><br/>
                                             </div>
                                         </div>
                                         <div className="row">
                                             <div className="col-4 pt-1">Expiration : </div>
-                                            <div className="col-2">
-                                                <TextField name="cardExpiration" value={this.state.cardExpiration} readOnly/>
+                                            <div className="col-3">
+                                                <input className="form-control" style={this.toggleError(4)} name="cardExpirationM" maxLength="2"
+                                                    placeholder="MM" value={this.state.cardExpirationM} onChange={this.handleOnChange}/>
+                                                <small style={this.toggleTextError(4)} className="input-error form-text text-muted">
+                                                    Invalid card expiration month
+                                                </small>
+                                            </div>
+                                            <div className="col-1" style={{margin:"0 -2vw"}}>/</div>
+                                            <div className="col-3">
+                                                <input className="form-control" style={this.toggleError(5)} name="cardExpirationY" maxLength="2"
+                                                    placeholder="YY" value={this.state.cardExpirationY} onChange={this.handleOnChange}/>
+                                                <small style={this.toggleTextError(5)} className="input-error form-text text-muted">
+                                                    Invalid card expiration year
+                                                </small><br/>
                                             </div>
                                         </div>
                                         <div className="row">
                                             <div className="col-4 pt-1">CCV : </div>
-                                            <div className="col-2">
-                                                <TextField name="cardCCV" value={this.state.cardCCV} readOnly/>
+                                            <div className="col-3">
+                                                <input className="form-control" style={this.toggleError(6)} name="cardCCV" maxLength="3"
+                                                    value={this.state.cardCCV} onChange={this.handleOnChange}/>
+                                                <small style={this.toggleTextError(6)} className="input-error form-text text-muted">
+                                                    Invalid card CCV
+                                                </small><br/>
                                             </div>
-                                        </div>
-                                        <div className="row mt-3">
-                                            <div className="col"> Billing address </div>
-                                        </div>
-                                        <div className="row">
-                                            <div className="col"> ...as above </div>
                                         </div>
                                     </div>
                                 </div>
@@ -362,7 +454,7 @@ export class PlaceOrder extends Component {
                         </div>
                     </div>
                     <div className="col">
-                        <Menu updateOrder={this.updateOrder} resetMenu={this.state.resetMenu}/>
+                        <Menu updateOrder={this.updateOrder} resetMenu={this.state.reset}/>
                     </div>
                 </div>
             </div>

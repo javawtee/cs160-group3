@@ -1,24 +1,31 @@
 import React, { Component } from 'react';
+
+import LocationSearchInput from "../../components/LocationSearchInput";
 import Validate from "../../components/Validate";
+
+const initState = userInfo => {
+    return {
+        userName: userInfo.userName,
+        joinedDate: userInfo.approvedDate,
+        phoneNumber: userInfo.phoneNumber,
+        email: userInfo.email,
+        address: userInfo.address,
+        editable: false,
+        oldPassword: "",
+        verified: false,
+        newPassword: "",
+        confirmNewPassword: "",
+        errors: [false,false,false,false,false],
+        revert: false, // indicate to revert address in LocationSearchInput
+        updateDelay: 30 * 60 * 1000 // delay 30 minutes between updates
+    }
+}
 
 export class UserInformation extends Component {
     constructor(props){
         super(props);
-        this.userInfo = JSON.parse(sessionStorage.getItem("user-token"));
-        this.state = {
-            userName: this.userInfo.userName,
-            joinedDate: this.userInfo.approvedDate,
-            phoneNumber: this.userInfo.phoneNumber,
-            email: this.userInfo.email,
-            address: this.userInfo.address,
-            editable: false,
-            oldPassword: "",
-            verified: false,
-            newPassword: "",
-            confirmNewPassword: "",
-            errors: [false,false,false,false,false],
-            updateDelay: 30 * 60 * 1000 // delay 30 minutes between updates
-        }
+        this.userInfo = () => { return JSON.parse(sessionStorage.getItem("user-token")) };
+        this.state = initState(this.userInfo());
     }
     toggleEditable = this.toggleEditable.bind(this)
     handleSubmit = this.handleSubmit.bind(this)
@@ -54,7 +61,7 @@ export class UserInformation extends Component {
                 newErrors[3] = false;
                 break;
             case "address":
-                newErrors[3] = false;
+                newErrors[4] = false;
                 break;
             default:
                 break;
@@ -76,12 +83,12 @@ export class UserInformation extends Component {
           body: JSON.stringify({uuid, oldPassword})
         })
         .then(res => res.json())
-        .then(payload => {
-            if(payload.numOfResults === 0)
+        .then(result => {
+            if(result !== "verified")
                 alert("Password is incorrect")
             else{
                 const errors = [false,false,false,false,false]
-                this.setState({verified: true, errors})
+                this.setState({oldPassword, verified: true, errors})
             }
         })
       }
@@ -111,8 +118,12 @@ export class UserInformation extends Component {
     
         newErrors[3] = !Validate.validEmailFormat(email); // true: valid ==> newErrors[3] = false
     
-        newErrors[4] = address !== null && !Validate.notEmpty(address); // true: notEmpty ==> newErrors[4] = false
-    
+        if(address !== null){
+            newErrors[4] = newErrors[4] || !Validate.notEmpty(address); // true: notEmpty ==> newErrors[4] = false
+        } else {
+            newErrors[4] = false;
+        }
+
         if(newErrors.filter(error => error === true).length > 0) // has any error, stop submitting
           this.setState({ errors: newErrors });
         else {
@@ -126,21 +137,45 @@ export class UserInformation extends Component {
                 body: JSON.stringify({uuid, oldPassword, newPassword, address, phoneNumber, email})
             })
             .then(res => res.json())
-            .then(payload => {
-                if(payload.numOfResults === 0)
-                    alert("Can't update information right now. Something goes wrong")
-                else{
-                    const errors = [false,false,false,false,false];
+            .then(result => {
+                if(result !== "success") alert("Can't update information right now. Something goes wrong")
+                else {
                     //update userToken
-                    this.userInfo.phoneNumber = phoneNumber;
-                    this.userInfo.email = email;
-                    this.userInfo.address = address;
-                    this.userInfo.lastInfoUpdated = (new Date()).getTime(); // to prevent user from editing info continuously
-                    sessionStorage.setItem("user-token", JSON.stringify(this.userInfo));
+                    var newUserInfo = this.userInfo();
+                    newUserInfo.phoneNumber = phoneNumber;
+                    newUserInfo.email = email;
+                    newUserInfo.address = address;
+                    newUserInfo.lastInfoUpdated = (new Date()).getTime(); // to prevent user from editing info continuously
+                    sessionStorage.setItem("user-token", JSON.stringify(newUserInfo));
 
-                    this.setState({editable: false, verified: false, errors});
+                    this.setState(initState(this.userInfo()));
                 }
             }) // whenever setState is called, this component will be re-rendered
+        }
+    }
+
+    formatDate = date => {
+        var temp = new Date(Date.parse(date));
+        var formattedDate = `${temp.getMonth()}/${temp.getDate()}/${temp.getFullYear()}
+                             ${temp.getHours()}:${temp.getMinutes()}:${temp.getSeconds()}`;
+        return <>{formattedDate}</>
+    }
+
+    setAddress = (data) => { // data:{result:"success", address}
+        if(data.result !== undefined){
+            var newErrors = this.state.errors;
+            if(data.result === "success"){
+                console.log("Address is valid. Within Santa Clara County");
+                newErrors[4] = false;
+                // update geocode for restaurant
+
+                this.setState({errors: newErrors, address: data.address});
+            }
+            else{
+                console.log("Address is invalid. Outside Santa Clara County");
+                newErrors[4] = true;
+                this.setState({errors: newErrors})
+            }
         }
     }
   render() {
@@ -149,96 +184,110 @@ export class UserInformation extends Component {
     return (
       <div>
         <form onSubmit={this.handleSubmit}>
-            <table className="col">
-            <tbody>               
-                <tr>
-                <td width="24%">Joined date: </td>
-                <td>
-                    {joinedDate}
-                </td>
-                </tr>
-                <tr>
-                <td>
-                    <a href="user/edit-information" onClick={this.toggleEditable}> 
-                    Edit information
-                    <img src="/media/edit-icon.png" alt="pencil" height="4%" width="8%"/>
-                    </a>
-                </td>
-                <td style={{visibility: (editable && !verified) ? "visible": "hidden"}}>
-                    Enter your password:&nbsp;
-                    <input type="password" name="oldPassword" value={oldPassword}
-                        onChange={this.handleOnChange}/> &nbsp;
-                    <button className="btn btn-primary" onClick={this.verifyPassword}>Verify</button>
-                </td>
-                </tr>
-                <tr>
-                <td colSpan="2"><hr/></td>
-                </tr>
-                <tr className="editable-tr">
-                <td>Name: </td>
-                <td>
-                    {userName}
-                </td>
-                </tr>
-                <tr className="editable-tr" style={{display: verified ? "": "none"}}>
-                <td>New password: </td>
-                <td>
-                    <input style={this.toggleError(0)} type="password" name="newPassword" value={newPassword}
-                        onChange={this.handleOnChange}/>
-                    <small style={this.toggleTextError(0)} className="input-error form-text text-muted">
-                    Min: 6 characters or too simple
-                    </small>
-                </td>
-                </tr>
-                <tr className="editable-tr" style={{display: verified ? "": "none"}}>
-                <td>Confirm new password: </td>
-                <td>
-                    <input style={this.toggleError(1)} type="password" name="confirmNewPassword" value={confirmNewPassword}
-                        onChange={this.handleOnChange}/>
-                    <small style={this.toggleTextError(1)} className="input-error form-text text-muted">Confirm password is not matching</small>
-                </td>
-                </tr>
-                <tr className="editable-tr">
-                <td>Phone Number: </td>
-                <td>
-                    <input style={this.toggleError(2)} name="phoneNumber" type="text" 
-                        readOnly={verified? false : true} value={phoneNumber} onChange={this.handleOnChange}/>
-                    <small style={this.toggleTextError(2)} className="input-error form-text text-muted">
-                    Empty or US phone number format is not regconized. Format: 123-123-4567 or 1231234567
-                    </small>
-                </td>
-                </tr>
-                <tr className="editable-tr">
-                <td>Email: </td>
-                <td>
-                    <input style={this.toggleError(3)} name="email" type="text" 
-                        readOnly={verified? false : true} value={email} onChange={this.handleOnChange}/>
-                    <small style={this.toggleTextError(3)} className="input-error form-text text-muted">
-                    Empty or email format is not regconized. Format: example@domain.com
-                    </small>
-                </td>
-                </tr>
-                <tr className="editable-tr" style={{display: address !== null ? "" : "none"}}>
-                <td>Address: </td>
-                <td>
-                    <input style={this.toggleError(4)} name="address" type="text" 
-                        readOnly={verified? false : true} value={address !== null ? address : ""} onChange={this.handleOnChange}/>
-                    <small style={this.toggleTextError(4)} className="input-error form-text text-muted">Address cannot be empty</small>
-                </td>
-                </tr>
-            </tbody>
+            <table className="col user-table">
+                <tbody>
+                    <tr>
+                        <td width="24%">Name: </td>
+                        <td>
+                            {userName}
+                        </td>
+                    </tr>             
+                    <tr>
+                        <td> Joined date: </td>
+                        <td>
+                            {this.formatDate(joinedDate)}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a className="btn btn-info" href="user/edit-information" onClick={this.toggleEditable}> 
+                                Edit information
+                                <img src="/media/edit-icon.png" alt="pencil" height="4%" width="8%"/>
+                            </a>
+                        </td>
+                        <td style={{visibility: (editable && !verified) ? "visible": "hidden"}}>
+                            Enter your password:&nbsp;
+                            <input type="password" name="oldPassword" value={oldPassword}
+                                onChange={this.handleOnChange}/> &nbsp;
+                            <button className="btn btn-primary" onClick={this.verifyPassword}>Verify</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colSpan="2"><hr/></td>
+                    </tr>
+                    <tr style={{display: verified ? "": "none"}}>
+                        <td>New password: </td>
+                        <td>
+                            <input className="form-control text-left text-truncate" style={this.toggleError(0)} type="password" name="newPassword" 
+                                value={newPassword} onChange={this.handleOnChange}/>
+                            <small style={this.toggleTextError(0)} className="input-error form-text text-muted">
+                                Min: 6 characters or too simple
+                            </small>
+                        </td>
+                    </tr>
+                    <tr style={{display: verified ? "": "none"}}>
+                        <td>Confirm new password: </td>
+                        <td>
+                            <input className="form-control text-left text-truncate" style={this.toggleError(1)} type="password" name="confirmNewPassword" value={confirmNewPassword}
+                                onChange={this.handleOnChange}/>
+                            <small style={this.toggleTextError(1)} className="input-error form-text text-muted">
+                                Confirm password is not matching
+                            </small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Phone Number: </td>
+                        <td>
+                            <input className="form-control text-left text-truncate" style={this.toggleError(2)} name="phoneNumber" type="text" 
+                                readOnly={verified? false : true} value={phoneNumber} onChange={this.handleOnChange} autoComplete="new-password"/>
+                            <small style={this.toggleTextError(2)} className="input-error form-text text-muted">
+                            Empty or US phone number format is not regconized. Format: 123-123-4567 or 1231234567
+                            </small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Email: </td>
+                        <td>
+                            <input className="form-control text-left text-truncate" style={this.toggleError(3)} name="email" type="text" 
+                                readOnly={verified? false : true} value={email} onChange={this.handleOnChange} autoComplete="new-password"/>
+                            <small style={this.toggleTextError(3)} className="input-error form-text text-muted">
+                            Empty or email format is not regconized. Format: example@domain.com
+                            </small>
+                        </td>
+                    </tr>
+                    <tr style={{display: address !== null ? "" : "none"}}>
+                        <td>Address: </td>
+                        <td>
+                            <LocationSearchInput isReadOnly={verified? false : true} 
+                                toggleError={this.toggleError(4)}
+                                setAddress={this.setAddress}
+                                presetValue={address || ""}
+                                revert={this.state.revert}
+                                updateRestaurantAddress ={address !== null}
+                            />
+                            <small style={this.toggleTextError(4)} className="input-error form-text text-muted">
+                                Invalid address or out of service range
+                            </small>
+                        </td>
+                    </tr>
+                </tbody>
             </table>
-            <div className="w-100"></div>
+            <div className="w-100 mt-2"></div>
             <div className="col" style={{display: verified ? "block": "none", padding: "3% 0"}} >
                 &nbsp;
                 <button type="submit" className="btn btn-primary">Update</button>
                 &nbsp;
-                <button type="cancel" className="btn btn-primary"
-                    onClick={(e) => {
+                <button type="cancel" className="btn btn-danger"
+                    onClick={e => {
                         e.preventDefault();
-                        const errors = [false,false,false,false,false]
-                        this.setState({editable: false, verified: false, errors})
-                    }}>
+                        this.setState(initState(this.userInfo()), () => {
+                            // toggle revert simutaneously to revert address in LocationSearchInput
+                            this.setState({revert:true}, () => {
+                                this.setState({revert: false});
+                            })
+                        });
+                    }}
+                >
                     Cancel
                 </button>
             </div>

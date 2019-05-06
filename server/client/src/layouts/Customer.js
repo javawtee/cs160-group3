@@ -5,19 +5,6 @@ import SearchIcon from '@material-ui/icons/Search';
 
 import CustomerDialog from "./dialog/CustomerDialog";
 
-const styles = theme => ({
-    margin: {
-        margin: theme.spacing.unit,
-    },
-    textField: {
-        marginLeft: theme.spacing.unit,
-        marginRight: theme.spacing.unit,
-    },
-    iconButton: {
-        padding: 10,
-    },
-});
-
 export class Customer extends Component {
     state = {
         searchText: '',
@@ -60,7 +47,6 @@ export class Customer extends Component {
                 <TextField
                     id="outlined-search-input"
                     label="Search for restaurant and food"
-                    className={styles}
                     name="searchText"
                     margin="normal"
                     variant="outlined"
@@ -70,7 +56,7 @@ export class Customer extends Component {
                     InputProps={{
                         endAdornment: 
                         <InputAdornment position="end">
-                            <IconButton className={styles.iconButton} aria-label="Search" type="submit">
+                            <IconButton style={{padding: 10}} aria-label="Search" type="submit">
                                 <SearchIcon />
                             </IconButton>
                         </InputAdornment>,

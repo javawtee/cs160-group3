@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 
-import GRecaptcha from "../../components/GRecaptcha";
+import LocationSearchInput from "../../components/LocationSearchInput";
 import Validate from "../../components/Validate";
 
 export class RestaurantForm extends Component {
@@ -60,7 +60,7 @@ export class RestaurantForm extends Component {
 
     newErrors[3] = !Validate.notEmpty(restaurantName); // true: notEmpty ==> newErrors[3] = false
 
-    newErrors[4] = !Validate.notEmpty(address); // true: notEmpty ==> newErrors[4] = false
+    newErrors[4] = newErrors[4] || !Validate.notEmpty(address); // true: notEmpty ==> newErrors[4] = false
 
     newErrors[5] = !Validate.validUSPhoneNumberFormat(phoneNumber); // true: valid ==> newErrors[5] = false
 
@@ -102,6 +102,22 @@ export class RestaurantForm extends Component {
       }
   }
 
+  setAddress = (data) => { // data:{result:"success", address}
+    if(data.result !== undefined){
+      var newErrors = this.state.errors;
+      if(data.result === "success"){
+        console.log("Address is valid. Within Santa Clara County");
+        newErrors[4] = false;
+        this.setState({errors: newErrors, address: data.address});
+      }
+      else{
+        console.log("Address is invalid. Outside Santa Clara County");
+        newErrors[4] = true;
+        this.setState({errors: newErrors})
+      }
+    }
+  }
+
   validateUserId(e){
     e.preventDefault();
     const {userId} = this.state
@@ -122,7 +138,7 @@ export class RestaurantForm extends Component {
                 <div className="col">
                     <label>User ID:</label>
                     <input style={this.toggleError(0)} type="text" className="form-control" name="userId" autoFocus
-                            value={this.state.userId} onChange={this.handleOnChange} onBlur={this.validateUserId}/>
+                            value={this.state.userId} onChange={this.handleOnChange} onBlur={this.validateUserId} autoComplete="new-password"/>
                     <small style={this.toggleTextError(0)} className="input-error form-text text-muted">
                       Min: 6, max: 20 characters or the format is not regconized (no space or !@#$%^&*)
                     </small>
@@ -132,7 +148,7 @@ export class RestaurantForm extends Component {
 
                     <label>Password:</label>
                     <input style={this.toggleError(1)} type="password" className="form-control" name="password" 
-                            value={this.state.password} onChange={this.handleOnChange}/>
+                            value={this.state.password} onChange={this.handleOnChange} />
                     <small style={this.toggleTextError(1)} className="input-error form-text text-muted">
                       Min: 6 characters or too simple
                     </small><br/>
@@ -144,30 +160,30 @@ export class RestaurantForm extends Component {
 
                     <label>Restaurant's name:</label>
                     <input style={this.toggleError(3)} type="text" className="form-control" name="restaurantName" 
-                            value={this.state.restaurantName} onChange={this.handleOnChange}/>
+                            value={this.state.restaurantName} onChange={this.handleOnChange} autoComplete= "new-password"/>
                     <small style={this.toggleTextError(3)} className="input-error form-text text-muted">Restaurant's name cannot be empty</small><br/>
 
                     <label>Address:</label>
-                    <input style={this.toggleError(4)} type="text" className="form-control" name="address"
-                            value={this.state.address} onChange={this.handleOnChange}/>
-                    <small style={this.toggleTextError(4)} className="input-error form-text text-muted">Address cannot be empty</small><br/>
+                    {/* <input style={this.toggleError(4)} type="text" className="form-control" name="address"
+                            value={this.state.address} onChange={this.handleOnChange}/> */}
+                      <LocationSearchInput toggleError={this.toggleError(4)} setAddress={this.setAddress}/>
+                    <small style={this.toggleTextError(4)} className="input-error form-text text-muted">
+                      Invalid address or out of service range
+                    </small><br/>
 
                     <label>Phone number:</label>
                     <input style={this.toggleError(5)} type="text" className="form-control" name="phoneNumber"
-                            value={this.state.phoneNumber} onChange={this.handleOnChange}/>
+                            value={this.state.phoneNumber} onChange={this.handleOnChange} autoComplete= "new-password"/>
                     <small style={this.toggleTextError(5)} className="input-error form-text text-muted">
                       Empty or US phone number format is not regconized. Format: 123-123-4567 or 1231234567
                     </small><br/>
 
                     <label>Email:</label>
                     <input style={this.toggleError(6)} type="text" className="form-control" name="email" 
-                            value={this.state.email} onChange={this.handleOnChange}/>
+                            value={this.state.email} onChange={this.handleOnChange} autoComplete= "new-password"/>
                     <small style={this.toggleTextError(6)} className="input-error form-text text-muted">
                       Empty or email format is not regconized. Format: example@domain.com
                     </small><br/>
-
-                    GRecaptcha is comment blocked <br/>
-                    {/* <GRecaptcha /><br/> */}
                     <button className="btn btn-primary" style={{marginTop: "5%"}} type='submit'>Submit</button>
                 </div>
             </div>

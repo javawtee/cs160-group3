@@ -29,7 +29,7 @@
                     <td><%= row.phoneNumber %></td>
                     <td><%= row.email %></td>
                     <td><% if(row.approved === 0) { %>
-                            <a href="/approve/<%=row.userId%>">Approve</a>
+                            <a href="/approve/<%=row.userId%>/<%=row.email%>">Approve</a>
                         <% } else { %>
                             <label>Approved</label>
                         <% } %></td>

@@ -1,24 +1,86 @@
 import React, { Component } from 'react';
-
 import PlaceOrder from "../dialog/PlaceOrder";
-import DriverNavigation from "../dialog/DriverNavigation";
+import DriverTracker from "../dialog/DriverTracker";
+
+var wsCheckInterval;
 
 export class RestaurantConsole extends Component {
   constructor(props){
     super(props);
     this.state = { 
-      ws: null,
+      ws: new WebSocket("ws://localhost:5002/restaurant"),
       geocode: {}, // restaurant's geocode : {latitude, longitude}
       orders: [],
       driverLocation: {},
       destination: {},
       openPlaceOrder: false,
       restaurant_uuid: JSON.parse(sessionStorage.getItem("user-token")).uuid, // can't be null
-      openDriverNavigation: false,
+      openDriverTracker: false,
     }
   }
 
-  componentWillMount(){
+  checkWSConnection = (ws, cb) => {
+    if(ws.readyState === 0){ // CONNECTING
+      console.log("Web socket is connecting")
+      ws.onopen = () => {
+        console.log("Web socket is open. Sending action");
+        cb();
+      }
+    } else if(ws.readyState === 1){ // OPEN
+      console.log("Web socket is open. Sending action");
+      cb(true);
+    } else {
+      console.log("Web socket is closed. Reconnecting... and sending action");
+      this.setState({ws: new WebSocket("ws://localhost:5002/restaurant")}, () => {
+        ws.onopen = () => {
+          this.setWebSocketListener();
+          console.log("Web socket is open. Sending action");
+          cb(true);
+        }
+      })
+    }
+  }
+
+  setWebSocketListener = () => {
+    const {ws, restaurant_uuid} = this.state;
+    ws.onerror = e => {
+      console.log(e)
+    }
+    ws.onmessage = (e) => {
+      var res = JSON.parse(e.data); // res = {uuid, id, deliveryStatus}
+      if(res.uuid === restaurant_uuid){
+        console.log("Ding! A message from server");
+        // notify server that update has been received
+        this.checkWSConnection(ws, () => ws.send(JSON.stringify({message:"received-update", uuid: restaurant_uuid})));
+        var newUpdatedOrders = this.state.orders;
+        // update delivery status
+        var order = newUpdatedOrders.filter(order => order.id === res.id)[0];
+        // get driver's location
+        if(res.driverLocation !== undefined && res.driverLocation !== null){
+          order.driverLocation = res.driverLocation;
+        }
+        order.deliveryStatus = res.deliveryStatus;
+        // newUpdatedOrders.map(order => { if(order.id === res.id) order.deliveryStatus = res.deliveryStatus; })
+        this.setState({orders: newUpdatedOrders}, () => this.sendToHistory());
+      }
+    }
+    ws.onclose = () => {
+      console.log("Timeout. Reconnecting...")
+      this.checkWSConnection(ws, () => this.setWebSocketListener());
+    }
+  }
+
+  componentWillUnmount(){ clearInterval(wsCheckInterval) }
+
+  componentDidMount(){
+    this.checkWSConnection(this.state.ws, opened => {if(!opened) this.setWebSocketListener()});
+
+    // checking restaurant's ws connection every 15s
+    wsCheckInterval = setInterval(() => {
+      this.checkWSConnection(this.state.ws, opened => {if(!opened) this.setWebSocketListener()})
+    }, 15000);
+    
+
     var restaurant_uuid = this.state.restaurant_uuid;
 
     // fetch today orders
@@ -38,43 +100,8 @@ export class RestaurantConsole extends Component {
       // else do nothing because we have conditional check for orders.length
     })
 
-    if(this.state.ws === null){
-      // ws = null => user refreshed page, ws set back to null
-      this.setState({ws: new WebSocket("ws://localhost:5002/restaurant")}, () => {
-        const ws = this.state.ws;
-        ws.onmessage = (e) => {
-          var res = JSON.parse(e.data);
-          if(res.uuid === restaurant_uuid){
-            // res = {uuid, id, deliveryStatus}
-            var newUpdatedOrders = this.state.orders;
-            // update delivery status
-            newUpdatedOrders.map(order => { if(order.id === res.id) order.deliveryStatus = res.deliveryStatus; })
-            this.setState({orders: newUpdatedOrders})
-          }
-          // ---- TRACKER FOR DRIVER's LOCATION
-          if(res.message !== undefined && res.message !== "failed"){
-            // var driverLocation = res.driverLocation;
-            // console.log(this.state.orders.filter(order => order.id === res.id))
-            // var customerAddress = "Lion Supermarket, Newark, CA 94560";
-            // // geocode destination / customer address
-            // fetch("https://maps.googleapis.com/maps/api/geocode/json" +
-            //     "?address=" + customerAddress +
-            //     "&key=AIzaSyAo-8nuqyyTuQI1ALVFP4aWsY-BisShauI")
-            // .then(res => res.json())
-            // .then(payload => {
-            //   if(payload.results.length > 0){
-            //     var latitude = payload.results[0].geometry.location.lat;
-            //     var longitude = payload.results[0].geometry.location.lng;
-            //     var destination = {latitude, longitude};
-            //     this.setState({driverLocation, destination});
-            //   }
-            // })
-          }
-        }
-      });
-    }
-
     if(JSON.parse(sessionStorage.getItem("user-token").geocode === undefined)){
+      // set restaurant's geocode to session
       fetch("https://maps.googleapis.com/maps/api/geocode/json" +
             "?address=" + JSON.parse(sessionStorage.getItem("user-token")).address +
             "&key=AIzaSyAo-8nuqyyTuQI1ALVFP4aWsY-BisShauI")
@@ -114,64 +141,140 @@ export class RestaurantConsole extends Component {
     this.setState({openPlaceOrder: false});
   }
 
-  openDriverNavigation = (e) => {
+  openDriverTracker = (e) => {
     e.preventDefault();
-    if(!e.target.name){
-      var id = Number(e.target.name); // id as order_id
-      this.state.ws.send(JSON.stringify({id}));
-    }
-    this.setState({openDriverNavigation: true});
+    var orderId = e.target.name; // String
+    // get driver's location
+    var thisOrder = this.state.orders.filter(order => order.id === Number(orderId))[0];
+    var driverLocation = typeof(thisOrder.driverLocation) === "string" ? JSON.parse(thisOrder.driverLocation) : thisOrder.driverLocation;
+    fetch("https://maps.googleapis.com/maps/api/geocode/json" +
+            "?address=" + thisOrder.customerAddress +
+            "&key=AIzaSyAo-8nuqyyTuQI1ALVFP4aWsY-BisShauI")
+      .then(res => res.json())
+      .then(payload => {
+        if(payload.results.length > 0){
+          var latitude = payload.results[0].geometry.location.lat;
+          var longitude = payload.results[0].geometry.location.lng;
+          var destination = {latitude, longitude};
+          this.setState({driverLocation, destination}, () => this.setState({openDriverTracker: true}));
+        }
+      })
   }
 
-  closeDriverNavigation = () => {
-    this.setState({openDriverNavigation: false});
+  closeDriverTracker = () => {
+    this.setState({openDriverTracker: false});
   }
 
-  checkOut = (orders) => { // orders is an array of JSON strings
+  sendToHistory = () => {
+    var orders = [];
+    this.state.orders.forEach(order => {
+      if(order.deliveryStatus !== 2){
+        orders.push(order);
+      } else {
+        this.props.sendToHistory(order);
+      }
+    })
+  
+    this.setState({orders});
+  } 
+
+  checkOut = orders => { // orders is an array of JSON strings
     const restaurant_uuid = this.state.restaurant_uuid;
     const name = JSON.parse(sessionStorage.getItem("user-token")).userName; // restaurant's name; can't be null
     const address = JSON.parse(sessionStorage.getItem("user-token")).address; // restaurant's address; can't be null
     const geocode = this.state.geocode;
+    async function processOrders(thisInstance){
+      const promises =  orders.map(async order => {
+        // add new property `deliveryStatus` to order
+        order.deliveryStatus = 0; // 0 means looking for driver
+        return order.customerAddress;
+      });
 
-    orders.map(order => {
-      // add new property `deliveryStatus` to order
-      order.deliveryStatus = 0; // 0 means looking for driver
-    });
+      // destinations = [address1, address2]
+      const destinations = await Promise.all(promises);
 
-    var deliveryDetails = {
-      restaurant: {
-        name,
-        address,
-        geocode,
-      },
-      orders,
+      var gService = new window.google.maps.DistanceMatrixService();
+      gService.getDistanceMatrix({
+              origins: [address],
+              destinations,
+              travelMode: 'DRIVING',
+              drivingOptions: {
+                  departureTime: new Date(Date.now()),
+                  trafficModel: "bestguess"
+              },
+              unitSystem: window.google.maps.UnitSystem.IMPERIAL,
+              avoidHighways: false,
+              avoidTolls: false
+      }, async (res, status) => {
+          if(status === "OK"){
+              const otherPromises = res.rows[0].elements.map(async (element,id) => {
+                // calculate delivery fee and estimate delivery time for each other
+                var minimumFee = id === 0 ? 6 : 0;
+                var distance = element.distance.value; // in meter
+                distance = distance * 0.000621371; // convert to miles ( ~1 meter =  0.000621371, google.com)
+                var deliveryFee = minimumFee + (distance * 2); //$2 for every mile
+                deliveryFee = "$" + deliveryFee.toFixed(2); // convert to String
+                var ETA = element.duration_in_traffic.value; // in seconds
+                return {deliveryFee, ETA}; // {String, number_in_seconds}
+              })              
+
+              // geoResults = [{deliveryFee, ETA}]
+              const geoResults = await Promise.all(otherPromises);
+
+              var temp = orders;
+
+              temp.forEach((order, id) => {
+                order.deliveryFee = geoResults[id].deliveryFee;
+                order.ETA = geoResults[id].ETA;
+              })
+
+              var sortedByETA = temp.length > 1 ? temp.sort((a,b) => {return a.ETA - b.ETA;}) : temp;
+              
+              var deliveryDetails = {
+                restaurant: {
+                  name,
+                  address,
+                  geocode,
+                },
+                orders: sortedByETA,
+              }
+
+              console.log(deliveryDetails);
+
+              // send an array of orders (1 or 2 elements) request to back-end
+              fetch("/restaurant/add-orders", 
+                {
+                method: "POST",
+                headers: {
+                  "Accept": "application/json",
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({restaurant_uuid, deliveryDetails})
+              })
+              .then(res => res.json())
+              .then(res => { // res as "failed" or orders
+                if(typeof(res) === "string"){ // failed
+                  alert("Web Server is down")
+                } else {
+                  var addedOrders = res; // added orders with inserted id's
+                  var temp = thisInstance.state.orders;
+                  // store records in client-side
+                  addedOrders.map(addedOrder => temp.push(addedOrder));
+                  thisInstance.setState({orders: temp});
+                }
+              })
+          } else {
+              console.log("ERR-calculateDeliveryFee: " + status)
+              alert("Failed to calculate fee. Free delivery :)");
+          }
+      });
     }
-    // send an array of orders (1 or 2 elements) request to back-end
-    fetch("/restaurant/add-orders", 
-      {
-      method: "POST",
-      headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({restaurant_uuid, deliveryDetails})
-    })
-    .then(res => res.json())
-    .then(res => { // res as "failed" or orders
-      if(typeof(res) === "string"){ // failed
-        alert("Web Server is down")
-      } else {
-        var addedOrders = res; // added orders with inserted id's
-        var temp = this.state.orders;
-        // store records in client-side
-        addedOrders.map(addedOrder => temp.push(addedOrder));
-        this.setState({orders: temp});
-      }
-    })
+    
+    processOrders(this);
   }
 
   renderOrders = () => {
-    if(this.state.orders.length === 0){
+    if(this.state.orders.length === 0 || this.state.orders.length === this.state.orders.filter(order => order.deliveryStatus === 2).length){
       return <div> No order found for today </div>
     }
 
@@ -191,24 +294,34 @@ export class RestaurantConsole extends Component {
         case 0:
           return "Looking for driver";
         case 1:
-          return <a name={orderId} href="/ghost-link" onClick={this.openDriverNavigation}>Delivering</a>
-        case 2:
-          return "DELIVERED"
+          return (
+          <a name={orderId} href="/ghost-link" onClick={this.openDriverTracker} 
+             data-toggle="tooltip" data-placement="bottom" title="Click here to see where driver is at">
+            In-Delivery
+          </a>
+          )
         default:
           return "error";
       }
     }
     
-    const orderList = this.state.orders.map((order, id) =>
+    const orderList = this.state.orders.filter(order => order.deliveryStatus !== 2).map((order, id) => 
         <div className="row" key={id}>
           <div className="col-1 border ">{id + 1}</div>
-          <div className="col-2 border text-left">{order.customerName}</div>
-          <div className="col-2 border text-left">{order.customerPhone}</div>
+          <div className="col-2 border text-left text-truncate" data-toggle="tooltip" data-placement="bottom" title={order.customerName}>
+            {order.customerName}
+          </div>
+          <div className="col-2 border text-left text-truncate" data-toggle="tooltip" data-placement="bottom" title={order.customerPhone}>
+            {order.customerPhone}
+          </div>
           <div className="col-2 border text-left text-truncate" data-toggle="tooltip" data-placement="bottom" title={order.customerAddress}>
             {order.customerAddress}
           </div>
-          <div className="col-2 border text-left" data-toggle="tooltip" data-placement ="bottom" title={renderItemList(order.orderedItems)}>
+          <div className="col-1 border text-left" data-toggle="tooltip" data-placement ="bottom" title={renderItemList(order.orderedItems)}>
             {(typeof(order.orderedItems) === "string" ? JSON.parse(order.orderedItems) : order.orderedItems).length} item(s)
+          </div>
+          <div className="col border text-left" data-toggle="tooltip" data-placement ="bottom" title={order.deliveryFee || ""}>
+            {order.deliveryFee || ""}
           </div>
           <div className="col border text-left">
               {renderDeliveryStatus(order.deliveryStatus, order.id)}
@@ -218,15 +331,16 @@ export class RestaurantConsole extends Component {
 
     return (
       <div className="container mt-2 mb-2">
-        <div className="row">
-          <div className="col-1 border">Order ID</div>
-          <div className="col-2 border">Customer name</div>
-          <div className="col-2 border">Customer phone</div>
-          <div className="col-2 border">Customer address</div>
-          <div className="col-2 border">Items</div>
-          <div className="col border">Status</div>
-        </div>
-        {orderList}
+          <div className="row">
+            <div className="col-1 border">Order ID</div>
+            <div className="col-2 border">Customer name</div>
+            <div className="col-2 border">Customer phone</div>
+            <div className="col-2 border">Customer address</div>
+            <div className="col-1 border">Items</div>
+            <div className="col border">Delivery Fee</div> 
+            <div className="col border">Status</div>
+          </div>
+          {orderList}
       </div>
     );    
   }
@@ -239,7 +353,6 @@ export class RestaurantConsole extends Component {
           <div className="col-6" style={{textAlign: "right"}}>
             <small>Automated request for delivery on Check-out</small> &nbsp;
             <button className="btn btn-primary" onClick={this.handlePlaceOrderOpen}>Place order</button>
-            
           </div>
         </div>
 
@@ -249,9 +362,9 @@ export class RestaurantConsole extends Component {
                 onClose={this.handlePlaceOrderClose} 
                 checkOut={this.checkOut} />
                 
-        <DriverNavigation 
-          open={this.state.openDriverNavigation} 
-          onClose={this.closeDriverNavigation}
+        <DriverTracker
+          open={this.state.openDriverTracker} 
+          onClose={this.closeDriverTracker}
           origin={this.state.driverLocation}
           destination={this.state.destination}
         />

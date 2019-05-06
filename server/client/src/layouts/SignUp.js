@@ -59,7 +59,7 @@ export class SignUp extends Component {
                         </button>
                         <span style={{display: this.state.currentStep === 2? "" : "none", paddingLeft: "1%", cursor: "pointer"}}
                             onClick={()=>this.setState({currentStep: 1})}> 
-                           <a href="#">You are not?</a>
+                           <a href="/sign-up#">You are not?</a>
                         </span>
                     </div>
                     <div className="col" 
