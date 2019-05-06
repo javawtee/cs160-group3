@@ -2,11 +2,13 @@ import React, { Component } from 'react'
 import DriverIncomingRequest from "../dialog/DriverIncomingRequest";
 import DriverNavigation from "../dialog/DriverNavigation";
 
+var wsCheckInterval;
+
 export class DriverConsole extends Component {
   constructor(props){
     super(props);
     this.state = {
-      ws: null,
+      ws: new WebSocket("ws://localhost:5001/driver"),
       driver_uuid: JSON.parse(sessionStorage.getItem("user-token")).uuid, // can't be null
       started: JSON.parse(sessionStorage.getItem("user-token")).started, // can't be null
       delivering: JSON.parse(sessionStorage.getItem("user-token")).delivering, // can't be null
@@ -19,13 +21,90 @@ export class DriverConsole extends Component {
     };
   }
 
-  componentWillMount = () => {    
-    //fetch delivery request
-
-    // prevent from losing ws connection
-    if(this.state.started){
-      this.setState({ws: new WebSocket("ws://localhost:5001/driver")})
+  checkWSConnection = (ws, cb) => {
+    if(ws.readyState === 0){ // CONNECTING
+      console.log("Web socket is connecting")
+      ws.onopen = () => {
+        this.setWebSocketListener();
+        console.log("Web socket is open. Sending action");
+        cb();
+      }
+    } else if(ws.readyState === 1){ // OPEN
+      console.log("Web socket is open. Sending action");
+      cb();
+    } else {
+      console.log("Web socket is closed. Reconnecting... and sending action");
+      this.setState({ws: new WebSocket("ws://localhost:5001/driver")}, () => {
+        ws.onopen = () => {
+          this.setWebSocketListener();
+          console.log("Web socket is open. Sending action");
+          cb();
+        }
+      })
     }
+  }
+
+  setWebSocketListener = () => {
+    const ws = this.state.ws;
+    ws.onerror = () => {
+      alert("Web server is down :(");
+    }
+    ws.onmessage = (e) => {
+      var res = JSON.parse(e.data);
+      if(this.state.started && res.request.uuid === this.state.driver_uuid){
+        console.log(new Date() + ": Ding! A message from server");
+        // notify server that update has been received
+        this.checkWSConnection(ws, () => ws.send(JSON.stringify({action:"received-request", uuid: this.state.driver_uuid})));
+        switch(res.message){
+          case "order-request":
+            // request for this driver
+            var deliverySummary = this.summarizeDelivery(res.request.deliveryDetails)
+            this.setState({deliveryDetails: res.request.deliveryDetails, deliverySummary, openDriverIncomingRequest: true})
+            break;
+          case "fetch-request":
+            var deliveryDetails = res.request.deliveryDetails;
+            this.setState({deliveryDetails});
+            break;
+          // using switch, so if I want to implement tracking, different message
+          default:
+            break;
+        }
+      }
+    };
+  }
+
+  componentWillUnmount(){ clearInterval(wsCheckInterval) }
+
+  componentDidMount(){
+    this.setWebSocketListener();
+
+    // fetch request if delivering
+    if(this.state.delivering){
+      var uuid = this.state.driver_uuid;
+      fetch("/driver/fetch-request", {
+        method: "POST",
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({uuid})
+      }).then(res => res.json())
+      .then(res => {
+        if(res.message === "fetched"){
+          console.log(res.request.deliveredDetails);
+          this.setState({deliveryDetails: res.request.deliveryDetails})
+        } else {
+          console.log("something goes wrong");
+        }
+      })
+    }
+
+    // checking driver's ws connection every 15s
+    wsCheckInterval = setInterval(() => {
+      if(this.state.started){
+        this.checkWSConnection(this.state.ws, opened => {if(!opened) this.setWebSocketListener()})
+      }
+    }, 15000);
   }
 
   updateSessionForStartedDelivering = () => {
@@ -71,62 +150,39 @@ export class DriverConsole extends Component {
     if(!started){
       this.getCurrentLocation((latitude, longitude) => {
         var currentLocation = {latitude, longitude};
-        this.setState({currentLocation}, () => {
-          var ws= new WebSocket("ws://localhost:5001/driver")
-          ws.onopen = () => {
-            const {currentLocation} = this.state;
-            var clientMetaData = {
-              action: "start",
-              uuid: driver_uuid,
-              location: currentLocation,
-            }
-            ws.send(JSON.stringify(clientMetaData));
-          }
-          ws.onmessage = (e) => {
-            // receiving order request
-            var request = JSON.parse(e.data);
-            if(request.message === undefined && request.uuid === driver_uuid){
-              // request for this driver
-              var deliverySummary = this.summarizeDelivery(request.deliveryDetails)
-              this.setState({deliveryDetails: request.deliveryDetails, deliverySummary, openDriverIncomingRequest: true})
-            }
-            // if the request is not for this driver, ignore it 
-            // REQUEST FOR LOCATION
-            if(request.message !== undefined && request.message === "need-your-location"){
-              this.getCurrentLocation((latitude, longitude) => {
-                var currentLocation = {latitude, longitude};
-                var id = request.id;
-                ws.send(JSON.stringify({message: "here-your-location", id, driverLocation: currentLocation}));
-              })
-            }
-          };
-          this.setState({ws, started: true}, () => this.updateSessionForStartedDelivering())
+        this.setState({started: true, currentLocation}, () => {
+          this.updateSessionForStartedDelivering();
+          this.checkWSConnection(ws, () => ws.send(JSON.stringify({action: "start", uuid: driver_uuid, location: this.state.currentLocation})));
         });
       });
     } else if(started && !delivering){ // prevent from using geolocation api
-      var clientMetaData = {
-        action: "stop",
-        uuid: driver_uuid,
-      }
-      ws.send(JSON.stringify(clientMetaData));
-      this.setState({ws: null, started: false}, () => this.updateSessionForStartedDelivering())
+      this.checkWSConnection(ws, () => ws.send(JSON.stringify({action: "stop", uuid: driver_uuid})));
+      this.setState({started: false}, () => this.updateSessionForStartedDelivering())
     } else if(delivering){
       alert("You have order(s) not delivered. Can't STOP now")
     }
   }
 
+  convertETAtoString = ETA => {
+    var minutes = Math.floor(ETA / 60);
+    return minutes + " mins "; // convert to String
+  }
+
   summarizeDelivery = (deliveryDetails) => {
     const {restaurant, orders} = deliveryDetails;
+    var totalETA = orders.length > 1 ? orders[0].ETA + orders[1].ETA : orders[0].ETA; // in seconds
+    totalETA = this.convertETAtoString(totalETA);
     var deliverySummary = {
       restaurant,
       totalOrders: orders.length,
-      totalEDT: orders.reduce((a,b) => a.estimatedDeliveryTime + b.estimatedDeliveryTime)
+      totalETA,
     }
     return deliverySummary;
   }
 
   closeDriverIncomingRequest = (accepted) => {
     this.setState({openDriverIncomingRequest: false}, () => {
+      const {ws} = this.state;
       var {driver_uuid, deliveryDetails} = this.state;
       if(!accepted){
         // return order to server
@@ -136,24 +192,41 @@ export class DriverConsole extends Component {
             uuid: driver_uuid,
             location: currentLocation,
           }
-          this.state.ws.send(JSON.stringify({action: "rejected", driver, deliveryDetails}));
-          this.setState({deliveryDetails: {}, deliverySummary: {}});
+          this.setState({deliveryDetails: {}, deliverySummary: {}}, () => {
+            this.checkWSConnection(ws, () => ws.send(JSON.stringify({action: "rejected", driver, deliveryDetails})));
+          });
         })
       } else {
         // accepted, update delivery status for order(s)
-        this.state.ws.send(JSON.stringify({action: "accepted", uuid: driver_uuid, deliveryDetails}));
-        this.setState({delivering: true, deliverySummary: {}});
+        this.getCurrentLocation((latitude, longitude) => {
+          var driverLocation = {latitude, longitude};
+          this.setState({delivering: true, deliverySummary: {}}, () => {
+            this.updateSessionForStartedDelivering();
+            this.checkWSConnection(ws, () => ws.send(JSON.stringify({action: "accepted", uuid: driver_uuid, deliveryDetails, driverLocation})));
+          });
+        })
       }
     })
   }
 
   openDriverNavigation = (e) => {
     e.preventDefault();
-    var destination = e.target.name;
-    // get current position of driver
-    this.getCurrentLocation((latitude, longitude) => {
-      var currentLocation = {latitude, longitude};
-      this.setState({currentLocation, destination, openDriverNavigation: true});
+    // geocode string address to lat,long
+    fetch("https://maps.googleapis.com/maps/api/geocode/json" +
+            "?address=" + e.target.name +
+            "&key=AIzaSyAo-8nuqyyTuQI1ALVFP4aWsY-BisShauI")
+    .then(res => res.json())
+    .then(payload => {
+      if(payload.results.length > 0){
+        var latitude = payload.results[0].geometry.location.lat;
+        var longitude = payload.results[0].geometry.location.lng;
+        var destination = {latitude, longitude};
+        // get current position of driver
+        this.getCurrentLocation((latitude, longitude) => {
+          var currentLocation = {latitude, longitude};
+          this.setState({currentLocation, destination, openDriverNavigation: true});
+        })
+      }
     })
   }
 
@@ -161,41 +234,62 @@ export class DriverConsole extends Component {
     this.setState({openDriverNavigation: false});
   }
 
-  deliveredOrder = (id) => {
-    var orders = this.state.deliveryDetails.orders.filter(order => order.id === id);
-    console.log(orders);
+  deliveredOrder = (id) => { // id as order id
+    const ws = this.state.ws;
+    var orders = this.state.deliveryDetails.orders;
+    var orderIndex = orders.findIndex(order => order.id === id);
     var deliveryDetails = {
       restaurant: this.state.deliveryDetails.restaurant,
-      orders
+      orders:[orders[orderIndex]]
     };
-    this.state.ws.send(JSON.stringify({action:"delivered", deliveryDetails}));
-    deliveryDetails.orders = this.state.deliveryDetails.orders.filter(order => order.id !== id);
-    this.setState({deliveryDetails}, () => {
-      if(this.state.deliveryDetails.orders.length === 0){
+    this.checkWSConnection(ws, () => ws.send(JSON.stringify({action:"delivered", deliveryDetails})));
+    
+    orders.splice(orderIndex, 1);
+    if(orders.length > 0){
+      deliveryDetails = {
+        restaurant: this.state.deliveryDetails.restaurant,
+        orders
+      };
+      this.setState({deliveryDetails});
+    } else {
+      // no more order
+      this.setState({delivering: false, deliveryDetails: {}, deliverySummary: {}}, () => {
         // driver is not delivering
-        this.state.ws.send(JSON.stringify({action:"finished-delivery", uuid: this.state.driver_uuid}));
-        this.setState({delivering: false, deliveryDetails: {}, deliverySummary: {}}, () => {
-            // driver becomes available
-            this.getCurrentLocation((latitude, longitude) => {
-              var location = {latitude, longitude};
-              this.state.ws.send(JSON.stringify({action:"start", uuid: this.state.driver_uuid, location}));
-            })
-        });
-      }
-    });
+        this.checkWSConnection(ws, () => ws.send(JSON.stringify({action:"finished-delivery", uuid: this.state.driver_uuid})));
+        // driver becomes available
+        this.getCurrentLocation((latitude, longitude) => {
+          var location = {latitude, longitude};
+          this.checkWSConnection(ws, () => ws.send(JSON.stringify({action:"start", uuid: this.state.driver_uuid, location})));
+          this.updateSessionForStartedDelivering();
+        })
+      });
+    }
   }
 
   renderDeliveryDetails = () => {
     if(this.state.deliveryDetails.restaurant !== undefined){
       const {restaurant, orders} = this.state.deliveryDetails;
+      const renderItemList = (items) => {
+        if(typeof(items) === "string"){
+          // prevent exception: loading from back-end
+          items = JSON.parse(items);
+        }
+        const itemList = items.map((item) => 
+          item.name + " (" + item.amount + ")\n" 
+        )
+        return itemList;
+      }
       const getRequestOrders = orders.map((order, id) => 
         <li key={id}>
           <div>
             To: {order.customerName}<br/>
-            Estimated delivery time: {(order.estimatedDeliveryTime/60000)} minutes<br/>
+            ETA from restaurant: { this.convertETAtoString(order.ETA) } <br/>
             Address: <a name={order.customerAddress} href="/ghost-link" onClick={this.openDriverNavigation}>{order.customerAddress}</a><br/>
             Phone number: {order.customerPhone} <br/>
-            <a href="/order/:ordernumber">Ordered items</a><br/>
+            <div className="col text-left" style={{marginLeft:"-1vw", marginBottom:"-2vh"}} 
+                  data-toggle="tooltip" data-placement ="bottom" title={renderItemList(order.orderedItems)}>
+              {(typeof(order.orderedItems) === "string" ? JSON.parse(order.orderedItems) : order.orderedItems).length} item(s)
+            </div><br/>
             <button className="btn btn-danger" onClick={() => this.deliveredOrder(order.id)}>DELIVERED?</button>
           </div>
         </li>

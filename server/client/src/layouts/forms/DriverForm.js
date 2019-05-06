@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 
-import GRecaptcha from "../../components/GRecaptcha";
 import Validate from "../../components/Validate";
 
 export class DriverForm extends Component {
@@ -122,7 +121,7 @@ export class DriverForm extends Component {
                 <div className="col">
                   <label>User ID:</label>
                   <input style={this.toggleError(0)} type="text" className="form-control" name="userId" autoFocus
-                          value={this.state.userId} onChange={this.handleOnChange} onBlur={this.validateUserId}/>
+                          value={this.state.userId} onChange={this.handleOnChange} onBlur={this.validateUserId} autoComplete="new-password"/>
                   <small style={this.toggleTextError(0)} className="input-error form-text text-muted">
                       Min: 6, max: 20 characters or the format is not regconized (no space or !@#$%^&*)
                     </small><br/>
@@ -148,13 +147,13 @@ export class DriverForm extends Component {
                     <label>Last name:</label>
                     <input style={this.toggleError(3)} type="text" 
                             className="form-control" name="lastName" placeholder="Last name"
-                            value={this.state.lastName} onChange={this.handleOnChange} />
+                            value={this.state.lastName} onChange={this.handleOnChange} autoComplete="new-password"/>
                     <small style={this.toggleTextError(3)} className="input-error form-text text-muted">Last name cannot be empty</small>
                 </div>
                 <div className="col-6">
                     <label>First name:</label>
                     <input style={this.toggleError(4)} type="text" className="form-control" name="firstName" placeholder="First name"
-                            value={this.state.firstName} onChange={this.handleOnChange} />
+                            value={this.state.firstName} onChange={this.handleOnChange} autoComplete="new-password"/>
                     <small style={this.toggleTextError(4)} className="input-error form-text text-muted">First name cannot be empty</small>
                 </div>
                 <div className="w-100"></div>
@@ -162,19 +161,17 @@ export class DriverForm extends Component {
                 <div className="col" style={{marginTop:"10px"}}>
                     <label>Phone number:</label>
                     <input style={this.toggleError(5)} type="text" className="form-control" name="phoneNumber"
-                           value={this.state.phoneNumber} onChange={this.handleOnChange} />
+                           value={this.state.phoneNumber} onChange={this.handleOnChange} autoComplete="new-password"/>
                     <small style={this.toggleTextError(5)} className="input-error form-text text-muted">
                         Empty or US phone number format is not regconized. Format: 123-123-4567 or 1231234567
                     </small><br/>
 
                     <label>Email:</label>
                     <input style={this.toggleError(6)} type="text" className="form-control" name="email" placeholder="example@domain.com"
-                            value={this.state.email} onChange={this.handleOnChange}/>
+                            value={this.state.email} onChange={this.handleOnChange} />
                     <small style={this.toggleTextError(6)} className="input-error form-text text-muted">
                         Empty or email format is not regconized. Format: example@domain.com
-                    </small><br/><br/><br/>
-                    GRecaptcha is comment blocked <br/>
-                    {/* <GRecaptcha /><br/> */}
+                    </small><br/>
                     <button className="btn btn-primary" style={{marginTop: "5%"}} type='submit'>Submit</button>
                 </div>
             </div>

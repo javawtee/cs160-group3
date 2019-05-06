@@ -7,8 +7,8 @@ class DirectionsMaker extends Component {
   }
 
   onScriptLoad() {
-    const directionsDisplay = new window.google.maps.DirectionsRenderer;
-    const directionsService = new window.google.maps.DirectionsService;
+    const directionsDisplay = new window.google.maps.DirectionsRenderer();
+    const directionsService = new window.google.maps.DirectionsService();
     //const map = new window.google.maps.Map(document.getElementById(this.props.id),this.props.options);
     const map = new window.google.maps.Map(document.getElementById(this.props.id));
 	  directionsDisplay.setMap(map);
@@ -47,7 +47,7 @@ class DirectionsMaker extends Component {
     //     }
     //   });
     // })
-    this.props.onMapLoad(map)
+    //this.props.onMapLoad(map)
   }
 
   componentDidMount() {

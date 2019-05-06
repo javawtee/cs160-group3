@@ -11,8 +11,9 @@ var transporter = nodemailer.createTransport({
 });
 
 module.exports = (to, subject, content) => {
-    new Promise((resolve, reject) => {
-        transporter.sendMail({user, to, subject, content}, function(error, info){
+    return new Promise((resolve, reject) => {
+        // transporter.sendMail(from, to, subject, plainText, html)
+        transporter.sendMail({from: user, to, subject, html:content}, function(error, info){
             if (error) {
                 reject(error)
             } else {

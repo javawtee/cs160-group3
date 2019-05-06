@@ -8,7 +8,7 @@ class Auth {
 
     logout = () => {
         sessionStorage.removeItem("user-token");
-        localStorage.removeItem("user-token");
+        if(!localStorage.getItem("user-token")) localStorage.removeItem("user-token");
     }
 
     isAuthenticated(){

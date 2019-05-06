@@ -28,13 +28,13 @@ export class DriverIncomingRequest extends Component {
 
     renderDeliverySummary = () => {
         if(this.props.deliverySummary.restaurant !== undefined){
-            const {restaurant, totalOrders, totalEDT} = this.props.deliverySummary;
+            const {restaurant, totalOrders, totalETA} = this.props.deliverySummary;
             return (
                 <div className="col mb-2">
                     From: {restaurant.name} <br/>
                     Address: {restaurant.address} <br/>
                     Number of order(s): {totalOrders} <br/>
-                    Total estimated delivery time: {(totalEDT / 60000)} minutes
+                    Total estimated delivery time: {totalETA} minutes
                 </div>
             )
         } else {

@@ -8,6 +8,13 @@
     "client": "npm start --prefix client",
     "dev": "concurrently \"npm run server\" \"npm run client\""
   },
+  "nodemonConfig": {
+    "ignore": [
+      "session/*.json",
+      "client/*"
+    ],
+    "delay": "2500"
+  },
   "dependencies": {
     "@google/maps": "^0.5.5",
     "concurrently": "^4.1.0",

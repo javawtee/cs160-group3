@@ -45,7 +45,7 @@ router.post('/login', (req, res) => {
                 approvedDate: rows[0].approvedDate,
                 address, // restaurant.address || null
               })
-              UserManager.addOnlineUsers({uuid, id, address})
+              UserManager.addOnlineUsers({uuid, id, address}) // should have expiration here
               res.json(payload);
             });
           } else {
@@ -55,6 +55,11 @@ router.post('/login', (req, res) => {
         }
     })
 });
+
+router.post("/logout", (req,res) => {
+  var uuid = req.body.uuid;
+  UserManager.removeOnlineUser(uuid).then(msg => res.json(msg)).catch(err => res.json(err))
+})
 
 router.get('/exists/:userId', (req, res) => {
   const userId = req.params.userId;
@@ -112,46 +117,32 @@ router.post('/sign-up/:userType', (req, res) => {
 
 // not test yet
 router.post("/edit-information", (req,res) => {
-  const {uuid, oldPassword, newPassword, phoneNumber, email, address} = req.body;
+  var {uuid, oldPassword, newPassword, phoneNumber, email, address} = req.body;
+  console.log(req.body);
   UserManager.getOnlineUsers(uuid).then(a => {
       var id = a.id;
-      var payload = {
-        numOfResults : 0,
-      }
-
-      if(newPassword === undefined ){
-        connection.query("SELECT id from users WHERE id=? AND password=?", [id, oldPassword], (err, rows) => {
-            if(err) {console.log(err);}
-            else {
-              payload.numOfResults = rows.length;
-              res.json(payload);
+      if(newPassword === undefined){
+        // used to verify password for user info. edition
+        connection.query("SELECT userId from users WHERE id=? AND password=?",[id,oldPassword], err =>{
+          if(err){console.log("ERR-verifyPassword: " + err); throw err;}
+          else res.json("verified");
+        })
+      } else {
+        newPassword = newPassword === "" ? oldPassword : newPassword;
+        connection.query("UPDATE users SET password=?, phoneNumber=?, email=? WHERE id=?", 
+                                          [newPassword, phoneNumber, email, id], err => {
+            if(err) {console.log("ERR-updateBasicInformation: " + err); throw err;}
+            else if(address !== null) {
+              connection.query("UPDATE restaurant SET address=? WHERE users_id =?",[address, id], err => {
+                  if(err) {console.log("ERR-updateRestaurantAddress: " + err); throw err;}
+                  else {
+                    res.json("success");
+                  }
+              })
+            } else {
+              res.json("success");
             }
-          }
-        )
-      }
-      
-      if(phoneNumber !== undefined || email !== undefined){
-        connection.query("UPDATE users SET phoneNumber=?, email=? WHERE id=?",[phoneNumber, email, id],
-          (err, rows) => {
-            if(err) {console.log(err);}
-            else {
-              payload.numOfResults = rows.affectedRows;
-              res.json(payload);
-            }
-          }
-        )
-      }
-  
-      if(address !== undefined && address !== null){
-        connection.query("UPDATE restaurant SET address=? WHERE users_id =?",[address, id],
-          (err, rows) => {
-            if(err) {console.log(err);}
-            else {
-              payload.numOfResults = rows.affectedRows;
-              res.json(payload);
-            }
-          }
-        )
+        })
       }
   }).catch(err => console.log(err))
 })

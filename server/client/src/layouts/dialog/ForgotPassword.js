@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { Dialog, TextField} from '@material-ui/core';
-import Validate from "../../components/Validate";
 
 export class ForgotPassword extends Component {
     constructor(props){
@@ -25,8 +24,7 @@ export class ForgotPassword extends Component {
             .then(payload => {
                 if(payload.numOfResults > 0){
                     var to = payload.email;
-                    var subject = "test sending email";
-                    var content = "worked"; 
+                    var subject = "SantaClaraDeliveryService - Simple Password Recovery";
                     fetch("/mailer", 
                     {
                         method: "POST",
@@ -34,14 +32,16 @@ export class ForgotPassword extends Component {
                         "Accept": "application/json",
                         "Content-Type": "application/json"
                         },
-                        body: JSON.stringify({to, subject, content})
+                        body: JSON.stringify({userId, to, subject})
                     })
-                    .then(() => {
-                        alert("Successfully sent recovery password. If you don't see email, check in Spam")
-                        this.props.onClose()
-                    }).catch(() => {
-                        alert("Failed to send email")
-                        return;
+                    .then(res => res.json())
+                    .then(result => {
+                        if(result === "success"){
+                            alert("Successfully sent recovery password. If you don't see email. Check Spam box");
+                        } else {
+                            alert("Failed to send recovery password. Try at another time");
+                        }
+                        this.props.onClose();
                     })
                 } else
                     this.setState({error: true});
