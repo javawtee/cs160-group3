@@ -8,7 +8,8 @@ export class DriverConsole extends Component {
   constructor(props){
     super(props);
     this.state = {
-      ws: new WebSocket("ws://localhost:5001/driver"),
+      ws: new WebSocket("ws://localhost:5001/driver", JSON.parse(sessionStorage.getItem("user-token")).uuid),
+      action: () => console.log("do nothing when first established"),
       driver_uuid: JSON.parse(sessionStorage.getItem("user-token")).uuid, // can't be null
       started: JSON.parse(sessionStorage.getItem("user-token")).started, // can't be null
       delivering: JSON.parse(sessionStorage.getItem("user-token")).delivering, // can't be null
@@ -21,31 +22,29 @@ export class DriverConsole extends Component {
     };
   }
 
-  checkWSConnection = (ws, cb) => {
+  checkWSConnection = (ws, action) => {
     if(ws.readyState === 0){ // CONNECTING
       console.log("Web socket is connecting")
-      ws.onopen = () => {
+      this.setState({action}, () => {
         this.setWebSocketListener();
-        console.log("Web socket is open. Sending action");
-        cb();
-      }
+      })
     } else if(ws.readyState === 1){ // OPEN
-      console.log("Web socket is open. Sending action");
-      cb();
+      console.log("Web socket is currently open. Sending action");
+      action();
     } else {
-      console.log("Web socket is closed. Reconnecting... and sending action");
-      this.setState({ws: new WebSocket("ws://localhost:5001/driver")}, () => {
-        ws.onopen = () => {
-          this.setWebSocketListener();
-          console.log("Web socket is open. Sending action");
-          cb();
-        }
+      console.log("Web socket is closed. Reconnecting...");
+      this.setState({ws: new WebSocket("ws://localhost:5001/driver", JSON.parse(sessionStorage.getItem("user-token")).uuid), action}, () => {
+        this.checkWSConnection(this.state.ws, this.state.action);
       })
     }
   }
 
   setWebSocketListener = () => {
     const ws = this.state.ws;
+    ws.onopen = () => {
+      console.log("Web socket is open. Sending action");
+      this.checkWSConnection(ws, () => this.state.action());
+    }
     ws.onerror = () => {
       alert("Web server is down :(");
     }
@@ -71,6 +70,11 @@ export class DriverConsole extends Component {
         }
       }
     };
+    ws.onclose = () => {
+      console.log("connection closed");
+      alert("ALERT! Multiple Access");
+      window.location.href = "https://www.google.com";
+    }
   }
 
   componentWillUnmount(){ clearInterval(wsCheckInterval) }
@@ -234,6 +238,10 @@ export class DriverConsole extends Component {
     this.setState({openDriverNavigation: false});
   }
 
+  sendToHistory = order => {
+    this.props.sendToHistory(order);
+  } 
+
   deliveredOrder = (id) => { // id as order id
     const ws = this.state.ws;
     var orders = this.state.deliveryDetails.orders;
@@ -243,7 +251,14 @@ export class DriverConsole extends Component {
       orders:[orders[orderIndex]]
     };
     this.checkWSConnection(ws, () => ws.send(JSON.stringify({action:"delivered", deliveryDetails})));
-    
+    // update to history
+    var order = {
+      orderDate: new Date(),
+      restaurantName: this.state.deliveryDetails.restaurant.name,
+      restaurantAddress: this.state.deliveryDetails.restaurant.address
+    };
+    this.sendToHistory(order);
+    // persist data in front-end
     orders.splice(orderIndex, 1);
     if(orders.length > 0){
       deliveryDetails = {

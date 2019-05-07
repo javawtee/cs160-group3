@@ -12,7 +12,8 @@
     "react-scripts": "^3.0.0",
     "uuid": "^3.3.2",
     "ws": "^6.2.1",
-    "zxcvbn": "^4.4.2"
+    "zxcvbn": "^4.4.2",
+    "google-maps-react": "^2.0.2"
   },
   "scripts": {
     "start": "react-scripts start",

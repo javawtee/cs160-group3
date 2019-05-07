@@ -8,61 +8,74 @@ var googleMaps = require("@google/maps").createClient({
 
 class UserManager {
     constructor(){
-        this.intervalToFindNearestDriver = setInterval(() => {
+        this.findingNearestDriver = false;
+        this.findNearestDriver = setInterval(() => {
             // checking every second to findTheNearestDriver if there is a pending order
-            if(this.pendingOrders.length > 0 && this.availableDrivers.length > 0){
+            if(this.pendingOrders.length > 0 && this.availableDrivers.length > 0 && !this.findingNearestDriver){
                 console.log("There are pending orders");
-                async function findTheNearestDriver (availableDrivers, pendingOrders, tobeNotifiedDrivers) {  
-                    const deliveryDetails = pendingOrders.shift();// get order at first of queue
-                    if(deliveryDetails.restaurant === undefined) { 
-                        return;
-                    }
+                const findTheNearestDriver = (availableDrivers, pendingOrders, tobeNotifiedDrivers , writeSession) => {
+                    return new Promise(async (resolve, reject) => { 
+                        const deliveryDetails = pendingOrders.shift();// get order at first of queue
+                        if(deliveryDetails.restaurant === undefined) { 
+                            return;
+                        }
 
-                    const promises = availableDrivers.map(async driver => {
-                      var destination = deliveryDetails.restaurant.geocode; // restaurant's location
-                      var uuid = driver.uuid;
-                      var origin = driver.location; // driver's location
-                      const promise = await googleMaps.distanceMatrix({
-                            origins: [origin],
-                            destinations: [destination],
-                            mode: "driving",
-                            departure_time: new Date(Date.now()),
-                            traffic_model: "best_guess",
-                            units: "imperial",
-                            avoid: ["tolls", "highways"],
-                        }).asPromise();
-                  
-                        return {
-                            uuid,
-                            duration_in_traffic :  promise.json.rows[0].elements[0].duration_in_traffic
+                        const promises = availableDrivers.map(async driver => {
+                        var destination = deliveryDetails.restaurant.geocode; // restaurant's location
+                        var uuid = driver.uuid;
+                        var origin = driver.location; // driver's location
+                        const promise = await googleMaps.distanceMatrix({
+                                origins: [origin],
+                                destinations: [destination],
+                                mode: "driving",
+                                departure_time: new Date(Date.now()),
+                                traffic_model: "best_guess",
+                                units: "imperial",
+                                avoid: ["tolls", "highways"],
+                            }).asPromise();
+                    
+                            return {
+                                uuid,
+                                duration_in_traffic :  promise.json.rows[0].elements[0].duration_in_traffic
+                            }
+                        })
+                    
+                        // wait until all promises resolve
+                        // results = [{uuid, duration_in_traffic: {text: "3 mins", value: 152}}]
+                        const results = await Promise.all(promises);
+                    
+                        // use the results
+                        if(results.length > 0) {
+                            var nearestDriver = results.reduce((prev, curr) => 
+                                        (prev.duration_in_traffic.value < curr.duration_in_traffic.value) ? prev: curr);
+                            var uuid = nearestDriver.uuid;
+                            // note for myself: nearestDriver can't be null
+                            console.log("Found the nearest or most available driver. Sending notification");
+                            deliveryDetails.orders.remainingTime = 0;
+                            deliveryDetails.orders.deliveryFee = ""; // driver won't see the fee
+                            // temporarily remove driver who received order request
+                            var rmDriverIndex = availableDrivers.findIndex(driver => driver.uuid === uuid);
+                            availableDrivers.splice(rmDriverIndex, 1);
+                            // notify the nearest driver
+                            tobeNotifiedDrivers.push({uuid, deliveryDetails});
+                            resolve(writeSession());
+                        } else {
+                            console.log("Something wrong. Return order to top of pendingOrders")
+                            reject(pendingOrders.unshift(deliveryDetails));
                         }
                     })
-                  
-                    // wait until all promises resolve
-                    // results = [{uuid, duration_in_traffic: {text: "3 mins", value: 152}}]
-                    const results = await Promise.all(promises);
-                  
-                    // use the results
-                    if(results.length > 0) {
-                        var nearestDriver = results.reduce((prev, curr) => 
-                                    (prev.duration_in_traffic.value < curr.duration_in_traffic.value) ? prev: curr);
-                        var uuid = nearestDriver.uuid;
-                        // note for myself: nearestDriver can't be null
-                        console.log("Found the nearest or most available driver. Sending notification");
-                        deliveryDetails.orders.remainingTime = 0;
-                        deliveryDetails.orders.deliveryFee = ""; // driver won't see the fee
-                        tobeNotifiedDrivers.push({uuid, deliveryDetails});
-                    } else {
-                        console.log("Something wrong. Return order to top of pendingOrders")
-                        pendingOrders.unshift(deliveryDetails);
-                    }
-                  }
-                findTheNearestDriver(this.availableDrivers, this.pendingOrders, this.tobeNotifiedDrivers);
-            }
-        }, 3000),
+                }   
 
-        // --- SERVER 
-        this.users = [], // FOR ADMIN 
+                this.findingNearestDriver = true;  
+                findTheNearestDriver(this.availableDrivers, this.pendingOrders, this.tobeNotifiedDrivers,() => this.writeSession())
+                .then(() => this.findingNearestDriver = false);
+            }
+        }, 5000),
+
+        // --- SERVER
+        this.users = [], // FOR ADMIN
+        // {sUuid, id, address (restaurant.address || null)}
+        this.idReferences = [], 
         // {uuid, id, address (restaurant.address || null)}
         this.onlineUsers = [],
         // --- DRIVER
@@ -100,7 +113,7 @@ class UserManager {
         // {uuid, deliveryDetails:{restaurant:{name, address}, orders:[{order1, order2}]}}
         this.deliveringDrivers = [],
         // --- RESTAURANT
-        // {uuid, id, deliveryStatus} // id as order_id
+        // {uuid, id, deliveryStatus}
         // deliveryStatus: 0:looking for driver, 1: delivering, 2: delivered
         this.tobeNotifiedRestaurants = [
             // {
@@ -131,14 +144,17 @@ class UserManager {
                     // data:{date, session:UserManagerInstance}
                     var lastSession = JSON.parse(data).session;
                     if(lastSession !== null){
-                        const {onlineUsers, availableDrivers, deliveringDrivers, tobeNotifiedDrivers, tobeNotifiedRestaurants, pendingOrders}
-                        = lastSession;
+                        const {
+                            idReferences, onlineUsers, availableDrivers, deliveringDrivers, 
+                            tobeNotifiedDrivers, tobeNotifiedRestaurants, pendingOrders
+                        } = lastSession;
+                        this.idReferences = idReferences;
                         this.onlineUsers = onlineUsers;
                         this.availableDrivers = availableDrivers;
                         this.deliveringDrivers = deliveringDrivers;
                         this.pendingOrders = pendingOrders;
                         this.tobeNotifiedRestaurants = tobeNotifiedRestaurants;
-                        //this.tobeNotifiedDrivers = tobeNotifiedDrivers;
+                        this.tobeNotifiedDrivers = tobeNotifiedDrivers;
                     }
                 }
             })
@@ -147,8 +163,14 @@ class UserManager {
         this.loadSession();
 
         this.writeSession = () => {
-            const {onlineUsers, availableDrivers, deliveringDrivers, pendingOrders, tobeNotifiedRestaurants, tobeNotifiedDrivers} = this;
-            const session = {onlineUsers, availableDrivers, deliveringDrivers, pendingOrders, tobeNotifiedRestaurants, tobeNotifiedDrivers};
+            const {
+                idReferences, onlineUsers, availableDrivers, deliveringDrivers, 
+                pendingOrders, tobeNotifiedRestaurants, tobeNotifiedDrivers
+            } = this;
+            const session = {
+                idReferences, onlineUsers, availableDrivers, deliveringDrivers, 
+                pendingOrders, tobeNotifiedRestaurants, tobeNotifiedDrivers
+            };
             fs.writeFile(corrupted, JSON.stringify({date:new Date(), session}), err => {
                 if(err) console.log("ERR-writeSession: " + err);
             })
@@ -169,7 +191,16 @@ class UserManager {
     } 
 
     // ---- SERVER
-    addOnlineUsers(user){ // user is a JSON with reference id (uuid), and users_id (id)
+    addIdReference(user){ // user is a JSON with super reference id (sSuid), users_id (id)
+        var exists = this.idReferences.filter(ref => ref.sUuid === user.sUuid).length > 0 ;
+        if(!exists){
+            this.idReferences.push(user);
+            // store it to local in case server is down, losing all user's session
+            this.writeSession();
+        }
+    }
+
+    addOnlineUsers(user){ // user is a JSON with reference id (uuid), users_id (id), and address (restaurant.address || null)
         var exists = this.onlineUsers.filter(onlineUser => onlineUser.uuid === user.uuid).length > 0 ;
         if(!exists){
             this.onlineUsers.push(user);
@@ -202,8 +233,17 @@ class UserManager {
                     return resolve({id, address});
                 }
             })
-            reject("no reference id like " + uuid + " exists");
+            return reject("no reference id like " + uuid + " exists");
         });
+    }
+
+    onSession(uuid){
+        // prevent user from logging multiple times
+        return new Promise((resolve,reject) => {
+            this.getOnlineUsers(uuid)
+            .then(() => reject()) // user is found on server session
+            .catch(() => resolve()) // user is not found on server session 
+        })
     }
 
     // ---- DRIVER
@@ -229,18 +269,15 @@ class UserManager {
         this.getOnlineUsers(driver.uuid).then(res => {
             var driver_id = res.id;
             var orders = driver.deliveryDetails.orders;
-            var query = "UPDATE orders SET driver_id=? WHERE id=?";
+            var query = `UPDATE orders SET driver_id=? WHERE id=?`
+            query.concat(orders.length === 1 ? `` : ` OR id=?`)
             var values = [driver_id, orders[0].id]
-            if(orders.length > 1){
-                query = "UPDATE orders SET driver_id=? WHERE id=? OR id=?";
-                values.push(orders[1].id);
-            }
+            values = orders.length > 1 ? values.push(orders[1].id) : values;
             connection.query(query, values, (err) => {
                 if(err) {console.log(err); throw err}
             })
         })
     }
-
     removeDeliveringDriver(uuid){
         var rmIndex = this.deliveringDrivers.findIndex(driver => driver.uuid === uuid);
         this.deliveringDrivers.splice(rmIndex, 1);
@@ -258,11 +295,12 @@ class UserManager {
         if(rejected){
             // rejected by driver, add to first of queue to prevent from starving
             this.pendingOrders.unshift(deliveryDetails);
+            this.writeSession();
         } else {
             // new order(s) from a restaurant, get in queue
             this.pendingOrders.push(deliveryDetails);
+            this.writeSession();
         }
-        this.writeSession();
     } 
 
     updateDeliveryStatus(deliveryDetails, deliveryStatus, driverLocation){ // deliveryDetails.map() is used when driver accepted 2 orders

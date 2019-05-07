@@ -5,12 +5,22 @@ import DriverConsole from "./console/DriverConsole";
 import RestaurantConsole from "./console/RestaurantConsole";
 import UserInformation from "./forms/UserInformation";
 import History from "./History";
+import RestaurantOverview from "./dialog/RestaurantOverview";
 
 export class User extends Component {
   state = {
     userType: JSON.parse(sessionStorage.getItem("user-token")).userType,
+    openRestaurantOverview: false,
     history:[],
   };
+
+  openRestaurantOverview = () => {
+    this.setState({openRestaurantOverview: true});
+  }
+
+  closeRestaurantOverview = () => {
+    this.setState({openRestaurantOverview: false});
+  }
 
   handleLogOut(e){
     e.preventDefault();
@@ -61,6 +71,7 @@ export class User extends Component {
       if(resp.message === "success"){
         this.setState({history: resp.rows});
       } else {
+        // no result
         console.log("failed to load history")
       }
     }).catch(msg => {
@@ -107,7 +118,10 @@ export class User extends Component {
           </div>
           <div className="row p-1" style={{background:"#243f6b", color:"#fff"}}>
             <div>
-              <button className="btn btn-primary ml-3 mb-3 mt-3">Preview profile</button>
+              <button className="btn btn-primary ml-3 mb-3 mt-3" style={{display: this.state.userType === "driver"? "none":""}}
+                        onClick={this.openRestaurantOverview}>
+                Preview profile
+              </button>
             </div>
             <UserInformation />
           </div>
@@ -115,6 +129,7 @@ export class User extends Component {
             <History list={this.state.history}/>
           </div>
         </div>
+        <RestaurantOverview open={this.state.openRestaurantOverview} onClose={this.closeRestaurantOverview} />
       </div>
     )
   }

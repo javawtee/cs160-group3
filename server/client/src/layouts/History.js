@@ -1,12 +1,19 @@
 import React, { Component } from 'react'
 
 export class History extends Component {
+  formatDate = date => {
+    var temp = new Date(Date.parse(date));
+    var formattedDate = `${temp.getMonth()}/${temp.getDate()}/${temp.getFullYear()}
+                         ${temp.getHours()}:${temp.getMinutes()}:${temp.getSeconds()}`;
+    return <>{formattedDate}</>
+  }
+
   renderTransactions = list => {
+    if(list.length === 0){
+      return <div> No past transactions found </div>
+    }
     var userType = JSON.parse(sessionStorage.getItem("user-token")).userType;
     if(userType === "restaurant"){
-      if(list.length === 0){
-        return <div> No past transactions found </div>
-      }
   
       const renderItemList = items => {
         if(typeof(items) === "string"){
@@ -41,7 +48,6 @@ export class History extends Component {
       );
   
       return (
-
         <div className="container mt-2 mb-2">
           <div className="container">
             <div className="row" style={{background:"#122b6b", color:"#fff"}}>
@@ -53,11 +59,44 @@ export class History extends Component {
               <div className="col border">Delivery Fee</div> 
             </div>
           </div>
-          <div className="container overflow-auto" style={{width:"101.8%", maxHeight:"250px"}}>
+          <div className="container" style={{width:"101.8%", maxHeight:"250px", overflow:"scroll"}}>
             {orderList}
           </div>
         </div>
       );    
+    } else {
+      // driver
+      const orderList = list.map((order, id) =>
+          <div className="row" key={id}>
+            <div className="col-1 border ">{id + 1}</div>
+            <div className="col-3 border text-left text-truncate" data-toggle="tooltip" data-placement="bottom" title={order.orderDate}>
+              {this.formatDate(order.orderDate)}
+            </div>
+            <div className="col-4 border text-left text-truncate text-uppercase" 
+                  data-toggle="tooltip" data-placement="bottom" title={order.restaurantName}>
+              {order.restaurantName}
+            </div>
+            <div className="col border text-left text-truncate" data-toggle="tooltip" data-placement="bottom" title={order.restaurantAddress}>
+              {order.restaurantAddress}
+            </div>
+          </div>
+      );
+  
+      return (
+        <div className="container mt-2 mb-2">
+          <div className="container">
+            <div className="row" style={{background:"#122b6b", color:"#fff"}}>
+              <div className="col-1 border">Order ID</div>
+              <div className="col-3 border">Date</div>
+              <div className="col-4 border">Restaurant name</div>
+              <div className="col border">Restaurant address</div>
+            </div>
+          </div>
+          <div className="container" style={{width:"101.8%", maxHeight:"250px", overflow:"scroll"}}>
+            {orderList}
+          </div>
+        </div>
+      );   
     }
   }
   render() {

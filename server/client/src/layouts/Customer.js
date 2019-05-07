@@ -31,8 +31,9 @@ export class Customer extends Component {
 
     searchSubmit(e){
         e.preventDefault();
-        alert("searched");
-        this.setState({searched: true})
+        alert("For your safety, wear a helmet! This feature is under construction");
+        return;
+        //this.setState({searched: true})
     }
   render() {
       const {searchText, searched, customerDialog} = this.state

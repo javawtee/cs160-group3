@@ -1,23 +1,38 @@
 class Auth {
     login = (storeLocal, userInfo) => {
         const token = getToken(userInfo);
-        sessionStorage.setItem("user-token", token); // token only exists if user logged in
-        if(storeLocal)
-            localStorage.setItem("user-token", token)
+        sessionStorage.setItem("user-token", JSON.stringify(token)); // token only exists if user logged in
+        if(storeLocal){
+            token.expiration = (new Date()).getTime() + (30 * 60000); // expired localStorage in 30 minutes
+        } else {
+            token.expiration = (new Date()).getTime() + (10080 * 60000); // expired localStorage in 7 days = 10080 minutes
+        }
+        localStorage.setItem("user-token", JSON.stringify(token));
     }
 
     logout = () => {
         sessionStorage.removeItem("user-token");
-        if(!localStorage.getItem("user-token")) localStorage.removeItem("user-token");
+        localStorage.removeItem("user-token");
+        localStorage.removeItem("user-lock");
     }
 
     isAuthenticated(){
-        const localToken = localStorage.getItem("user-token");
-        const token = sessionStorage.getItem("user-token");
-        if(localToken === null && token === null) // != null ==> userToken exists
-            return false;
-
-        return true;
+        var token = localStorage.getItem("user-token");
+        if(token !== null) {
+            token = JSON.parse(token);
+            if(token.expiration - (new Date()).getTime() <= 0){
+                alert("Your token is expired. Please log-in again");
+                // token is expired, require new token
+                //var uuid = token.uuid;
+                // force to logout => remove localStorage
+                this.logout();
+                return false;
+            }
+            delete token.expiration; // sessionStorage doesn't need this
+            sessionStorage.setItem("user-token", JSON.stringify(token));
+            return true;
+        }
+        return false;
     }
 }
 
@@ -36,7 +51,7 @@ function getToken(userInfo){
         aToken.started = false;
         aToken.delivering = false;
     }
-    return JSON.stringify(aToken); // aToken is a JSON string
+    return aToken; // aToken is a JSON string
 }
 
 export default new Auth()
