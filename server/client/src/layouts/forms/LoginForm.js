@@ -10,7 +10,7 @@ export class LoginForm extends Component {
       this.state = {    
         userId: '',
         password: '',
-        saveLocal: false,
+        rememberMe: false,
         forgotPassword: false,
         who: this.props.who
       };
@@ -21,6 +21,11 @@ export class LoginForm extends Component {
     onLogin = (e) => {
       e.preventDefault();
       const {userId, password} = this.state;
+      if(localStorage.getItem("user-token") !== null){
+        alert("ALERT! Multiple Access");
+        window.location.href = "https://www.google.com"
+        return;
+      }
       if(userId !== "" && password !== ""){
           const NAMESPACE = "45e669ee-e736-4354-9efc-e1d620b18c69"; // random UUID
           const uuid = uuid5(userId, NAMESPACE)
@@ -34,12 +39,15 @@ export class LoginForm extends Component {
             body: JSON.stringify({uuid, userId, password})
           })
           .then(res => res.json())
-          .then(payload => {
-            if(payload.numOfResults === 0)
-              alert("UserID or Password is incorrect");
-            else {
-              Auth.login(this.state.saveLocal, payload.results[0]); // create login session
+          .then(resp => {
+            if(resp.message === "success") {
+              Auth.login(this.state.rememberMe, resp.serverToken); // create login session
               this.props.switchToConsole(); // passing to HomePage
+            } else if (resp.message === "multiple-access") {
+              alert("ALERT! Multiple Access");
+              window.location.href = "https://www.google.com"
+            } else {
+              alert("UserID or Password is incorrect");
             }
           }) // whenever setState is called, this component will be re-rendered
       } else 
@@ -92,7 +100,7 @@ export class LoginForm extends Component {
 
               <div className="w-100"></div>
               <div className="col">
-                <Checkbox onChange={() => this.setState({saveLocal: true})}/> Save password<br/>
+                <Checkbox onChange={() => this.setState(prev => ({rememberMe: !prev.rememberMe}))}/> Remember Me<br/>
                 <a href='/forgot-password' onClick={this.handleOpenForgotPassword}>Forgot password?</a><br/><br/>
               </div>
 

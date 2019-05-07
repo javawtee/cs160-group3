@@ -3,7 +3,7 @@ const router = express.Router();
 const connection = require("./connector");
 var UserManager = require("./userManager");
 
-router.post('/login', (req, res) => {
+router.post("/login", (req, res) => {
     var uuid = req.body.uuid; // a reference index for user in back-end
     var uid = req.body.userId
     var pw = req.body.password
@@ -12,11 +12,6 @@ router.post('/login', (req, res) => {
       [uid, pw] , (err, rows) => {
         if(err) throw err
         else {
-          // create a variable to load results
-          var payload = {
-            numOfResults : rows.length,
-            results: []
-          }
           if(rows.length > 0) {
             var id = rows[0].id; // users_id
             // only restaurant has property address
@@ -34,23 +29,31 @@ router.post('/login', (req, res) => {
                 }
               })
             }
-            getAddress().then(address => {
-              // successfully logged in, store in array of online users
-              payload.results.push({
-                uuid,
-                userName: rows[0].userName,
-                userType: rows[0].userType,
-                phoneNumber: rows[0].phoneNumber,
-                email: rows[0].email,
-                approvedDate: rows[0].approvedDate,
-                address, // restaurant.address || null
-              })
-              UserManager.addOnlineUsers({uuid, id, address}) // should have expiration here
-              res.json(payload);
-            });
+            UserManager.getOnlineUsers(uuid).then(() => {
+              // user is online in different device
+              res.json({message:"multiple-access"});
+            }).catch(() => {
+              // able to login
+              getAddress().then(address => {
+                // successfully logged in, store in array of online users
+                var serverToken = {
+                  uuid,
+                  userName: rows[0].userName,
+                  userType: rows[0].userType,
+                  phoneNumber: rows[0].phoneNumber,
+                  email: rows[0].email,
+                  approvedDate: rows[0].approvedDate,
+                  address, // restaurant.address || null
+                };
+                // simple super uuid
+                var sUuid = uuid + "server";
+                UserManager.addIdReference({sUuid, id, address});
+                res.json({message:"success", serverToken});
+              });
+            })
           } else {
             // else send default initialization of data
-            res.json(payload);
+            res.json({message:"failed-to-authenticate"});
           }
         }
     })

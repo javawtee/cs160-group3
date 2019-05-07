@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Auth from "../../components/Auth";
 import PlaceOrder from "../dialog/PlaceOrder";
 import DriverTracker from "../dialog/DriverTracker";
 
@@ -8,41 +9,41 @@ export class RestaurantConsole extends Component {
   constructor(props){
     super(props);
     this.state = { 
-      ws: new WebSocket("ws://localhost:5002/restaurant"),
+      restaurant_uuid: JSON.parse(sessionStorage.getItem("user-token")).uuid, // can't be null
+      ws: new WebSocket("ws://localhost:5002/restaurant", JSON.parse(sessionStorage.getItem("user-token")).uuid),
+      action: () => console.log("do nothing when first established"),
       geocode: {}, // restaurant's geocode : {latitude, longitude}
       orders: [],
       driverLocation: {},
       destination: {},
       openPlaceOrder: false,
-      restaurant_uuid: JSON.parse(sessionStorage.getItem("user-token")).uuid, // can't be null
       openDriverTracker: false,
     }
   }
 
-  checkWSConnection = (ws, cb) => {
+  checkWSConnection = (ws, action) => {
     if(ws.readyState === 0){ // CONNECTING
       console.log("Web socket is connecting")
-      ws.onopen = () => {
-        console.log("Web socket is open. Sending action");
-        cb();
-      }
+      this.setState({action}, () => {
+        this.setWebSocketListener();
+      })
     } else if(ws.readyState === 1){ // OPEN
-      console.log("Web socket is open. Sending action");
-      cb(true);
+      console.log("Web socket is currently open. Sending action");
+      action(true);
     } else {
-      console.log("Web socket is closed. Reconnecting... and sending action");
-      this.setState({ws: new WebSocket("ws://localhost:5002/restaurant")}, () => {
-        ws.onopen = () => {
-          this.setWebSocketListener();
-          console.log("Web socket is open. Sending action");
-          cb(true);
-        }
+      console.log("Web socket is closed. Reconnecting...");
+      this.setState({ws: new WebSocket("ws://localhost:5002/restaurant",JSON.parse(sessionStorage.getItem("user-token")).uuid), action}, () => {
+        this.checkWSConnection(this.state.ws, this.state.action);
       })
     }
   }
 
   setWebSocketListener = () => {
     const {ws, restaurant_uuid} = this.state;
+    ws.onopen = () => {
+      console.log("Web socket is open. Sending action");
+      this.checkWSConnection(ws, () => this.state.action());
+    }
     ws.onerror = e => {
       console.log(e)
     }
@@ -54,19 +55,23 @@ export class RestaurantConsole extends Component {
         this.checkWSConnection(ws, () => ws.send(JSON.stringify({message:"received-update", uuid: restaurant_uuid})));
         var newUpdatedOrders = this.state.orders;
         // update delivery status
-        var order = newUpdatedOrders.filter(order => order.id === res.id)[0];
-        // get driver's location
-        if(res.driverLocation !== undefined && res.driverLocation !== null){
-          order.driverLocation = res.driverLocation;
+        var order = newUpdatedOrders.filter(order => order.id === res.id);
+        if(order.length > 0){ // prevent server's exception
+          order = order[0];
+          // get driver's location
+          if(res.driverLocation !== undefined && res.driverLocation !== null){
+            order.driverLocation = res.driverLocation;
+          }
+          order.deliveryStatus = res.deliveryStatus;
+          // newUpdatedOrders.map(order => { if(order.id === res.id) order.deliveryStatus = res.deliveryStatus; })
+          this.setState({orders: newUpdatedOrders}, () => this.sendToHistory());
         }
-        order.deliveryStatus = res.deliveryStatus;
-        // newUpdatedOrders.map(order => { if(order.id === res.id) order.deliveryStatus = res.deliveryStatus; })
-        this.setState({orders: newUpdatedOrders}, () => this.sendToHistory());
       }
     }
     ws.onclose = () => {
-      console.log("Timeout. Reconnecting...")
-      this.checkWSConnection(ws, () => this.setWebSocketListener());
+      console.log("connection closed");
+      alert("ALERT! Multiple Access");
+      window.location.href = "https://www.google.com";
     }
   }
 
@@ -93,11 +98,18 @@ export class RestaurantConsole extends Component {
       body: JSON.stringify({restaurant_uuid})
     })
     .then(res => res.json())
-    .then(payload => { // payload is an array of today orders of restaurant_uuid
-      if(payload.numOfResults > 0){
-        this.setState({orders: payload.rows})
+    .then(resp => { // payload is an array of today orders of restaurant_uuid
+      if(resp === "success"){
+        this.setState({orders: resp.rows})
       }
       // else do nothing because we have conditional check for orders.length
+    }).catch(msg => {
+      if(msg === "error"){
+        // force to logout
+        alert("Web Server can't authorize you. Please log-in again. Sorry for the inconvenience");
+        Auth.logout();
+        window.location.href="/";
+      }
     })
 
     if(JSON.parse(sessionStorage.getItem("user-token").geocode === undefined)){
@@ -119,7 +131,7 @@ export class RestaurantConsole extends Component {
       })
     }
 
-    // prevent from losing order not checked out
+    // prevent from losing not checked-out order
     if(JSON.parse(sessionStorage.getItem("ordersInARow")) !== null){
       if(JSON.parse(sessionStorage.getItem("ordersInARow")).length > 0){
         this.setState({openPlaceOrder: true});
@@ -192,7 +204,6 @@ export class RestaurantConsole extends Component {
 
       // destinations = [address1, address2]
       const destinations = await Promise.all(promises);
-
       var gService = new window.google.maps.DistanceMatrixService();
       gService.getDistanceMatrix({
               origins: [address],
@@ -239,7 +250,7 @@ export class RestaurantConsole extends Component {
                 orders: sortedByETA,
               }
 
-              console.log(deliveryDetails);
+              //console.log(deliveryDetails);
 
               // send an array of orders (1 or 2 elements) request to back-end
               fetch("/restaurant/add-orders", 
@@ -252,15 +263,24 @@ export class RestaurantConsole extends Component {
                 body: JSON.stringify({restaurant_uuid, deliveryDetails})
               })
               .then(res => res.json())
-              .then(res => { // res as "failed" or orders
-                if(typeof(res) === "string"){ // failed
-                  alert("Web Server is down")
-                } else {
-                  var addedOrders = res; // added orders with inserted id's
+              .then(resp => { // message:"success", orders ([] of orderwith inserted id's)s
+                if(resp.message === "success"){ 
+                  var orders = resp.orders;
                   var temp = thisInstance.state.orders;
                   // store records in client-side
-                  addedOrders.map(addedOrder => temp.push(addedOrder));
+                  orders.forEach(order => temp.push(order));
                   thisInstance.setState({orders: temp});
+                } else if (resp.message === "error") {
+                  alert("Web Server can't authorize your process. Try again");
+                } else { // message:"no-affect"
+                  alert("Your request is not successfully processed. Try again");
+                }
+              }).catch(msg => {
+                if(msg === "error"){
+                  // force to logout
+                  alert("Web Server can't authorize you. Please log-in again. Sorry for the inconvenience");
+                  Auth.logout();
+                  window.location.href="/";
                 }
               })
           } else {

@@ -188,7 +188,7 @@ export class UserInformation extends Component {
                 <tbody>
                     <tr>
                         <td width="24%">Name: </td>
-                        <td>
+                        <td className="text-uppercase">
                             {userName}
                         </td>
                     </tr>             

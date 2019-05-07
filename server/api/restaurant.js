@@ -24,29 +24,48 @@ setInterval(() => {
             }) 
         }
     }
-}, 3000); 
+}, 5000);
 
-wss.on("connection", ws => {
-    var clientId = wss.clients.size -1;
-    console.log("[CONNECT] a restaurant has recently joined, id = " + clientId);
-
-    ws.on("message", e => {
-        var metaData = JSON.parse(e);
-        switch(metaData.message){
-            case "received-update":
-                console.log("An update received");
-                var updates = UserManager.tobeNotifiedRestaurants;
-                var rmUpdateIndex = updates.findIndex(update => update.uuid === metaData.uuid);
-                updates.splice(rmUpdateIndex, 1);
-                UserManager.writeSession();
-                break;
-            default:
-                break;
+wss.on("connection", (ws,protocols) => {
+    // get protocol parameter, see api/WS-IncomingMessage
+    var uuid = protocols.rawHeaders[protocols.rawHeaders.length - 1];
+    UserManager.onSession(uuid)
+    .then(() => {
+        // not found on server session, start writing session for this user
+        var sUuid = uuid + "server";
+        var refIndex = UserManager.idReferences.findIndex(ref => ref.sUuid === sUuid);
+        if(refIndex > -1){
+            // user has logged in => id, address in idReferences exists
+            var id = UserManager.idReferences[refIndex].id;
+            var address = UserManager.idReferences[refIndex].address;
+            UserManager.addOnlineUsers({uuid, id, address}); // add user session
+            console.log("[CONNECT] a restaurant has recently joined, uuid = " + uuid);
+            ws.on("message", e => {
+                var metaData = JSON.parse(e);
+                switch(metaData.message){
+                    case "received-update":
+                        console.log("An update received");
+                        var updates = UserManager.tobeNotifiedRestaurants;
+                        var rmUpdateIndex = updates.findIndex(update => update.uuid === metaData.uuid);
+                        updates.splice(rmUpdateIndex, 1);
+                        UserManager.writeSession();
+                        break;
+                    default:
+                        break;
+                }
+            })
+        
+            ws.on("close", () => {
+                console.log("[DISCONNECT] a restaurant has just left, id = " + uuid);
+                // remove user session, will print "User is not found" because if logging out, user session had been removed before
+                UserManager.removeOnlineUser(uuid).catch(err => console.log(err)); 
+            })
+        } else {
+            console.log("exception"); // any exception not to thought of
         }
-    })
-
-    ws.on("close", () => {
-        console.log("[DISCONNECT] a restaurant has just left, id = " + clientId);
+    }).catch(() => {
+        // found on server session
+        ws.close();
     })
 }) 
 
@@ -60,14 +79,15 @@ router.post("/today", (req, res) => {
                                      WHERE restaurant_id=${info.id} AND DAY(order_date)=DAY(NOW()) AND delivery_status != 2`, (err,rows) => {
                 if(err) {console.log(err);res.json(err)}
                 else {
-                    var payload = {
-                        numOfResults: rows.length,
-                        rows
+                    if(rows.length > 0){
+                        //prepare orderedItems to correct format
+                        res.json({message:"success", rows});
+                    } else {
+                        res.json({message:"no-result"})
                     }
-                    res.json(payload);
                 }
         })
-    }).catch(err => res.send(err))
+    }).catch(err => {console.log(err); res.json("error")});
 })
 
 router.post("/history", (req, res) => {
@@ -85,7 +105,7 @@ router.post("/history", (req, res) => {
                     }
                 }
         })
-    }).catch(() => res.json("error")) // error: no restaurant is found with uuid
+    }).catch(err => {console.log(err); res.json("error")}) // error: no restaurant is found with uuid
 })
 
 router.post("/add-orders", (req, res) => {
@@ -101,22 +121,24 @@ router.post("/add-orders", (req, res) => {
             values.push([restaurant_id, customerName, customerAddress, customerPhone, items, deliveryFee]);
         })
         connection.query(query, [values], (err, resultForThisRequest) => {
-            if(err) {console.log(err); res.json("failed");}
+            if(err) {console.log(err); res.json({message: "error"});}
             else if(resultForThisRequest.affectedRows > 0){
                 //{deliveryDetails:{restaurant:{name, address, geocode:{latitude, longitude}}
                 // , orders:[{order:{id, customerInfo, items, estimatedDeliveryTime, deliveryFee}}]}}
                 var insertedId = resultForThisRequest.insertId;
-                orders.map(order => {
+                orders.forEach(order => {
                     // add id (order_id)
                     order.id = insertedId;
                     insertedId++;
                 })
                 deliveryDetails.orders = orders;
                 UserManager.addPendingOrder(deliveryDetails, false); // this is new order, never been rejected (false) by driver
-                res.json(orders) // updated order ids for new inserted in client-side
+                res.json({message:"success", orders})
+            } else {
+                res.json({message:"no-affect"})
             }
         })
-    }).catch(err => console.log(err));
+    }).catch(err => {console.log(err); res.json("error")});
     
 })
 
