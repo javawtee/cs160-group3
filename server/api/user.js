@@ -3,6 +3,11 @@ const router = express.Router();
 const connection = require("./connector");
 var UserManager = require("./userManager");
 
+router.post("/is-logged", (req, res) => {
+  var uuid = req.body.uuid;
+  UserManager.onSession(uuid).then(() => res.json("not-on-session")).catch(() => res.json("on-session"));
+})
+
 router.post("/login", (req, res) => {
     var uuid = req.body.uuid; // a reference index for user in back-end
     var uid = req.body.userId;
@@ -148,11 +153,6 @@ router.post("/edit-information", (req,res) => {
         })
       }
   }).catch(err => console.log(err))
-})
-
-router.get("/test1", (req,res) => {
-  UserManager.getOnlineUsers("0f457377-b8b6-539b-8f56-2114155fab6e").then(u => res.send(u)).catch(err => res.send(err))
-  //const a = UserManager.getOnlineUsers().then(test => res.send(test));
 })
 
 module.exports = router;

@@ -137,7 +137,7 @@ export class RestaurantForm extends Component {
             <div className="row" style={{padding: "2% 10%"}}>
                 <div className="col">
                     <label>User ID:</label>
-                    <input style={this.toggleError(0)} type="text" className="form-control" name="userId" autoFocus
+                    <input style={this.toggleError(0)} type="text" className="form-control" name="userId" autoFocus maxLength="32"
                             value={this.state.userId} onChange={this.handleOnChange} onBlur={this.validateUserId} autoComplete="new-password"/>
                     <small style={this.toggleTextError(0)} className="input-error form-text text-muted">
                       Min: 6, max: 20 characters or the format is not regconized (no space or !@#$%^&*)
@@ -147,19 +147,19 @@ export class RestaurantForm extends Component {
                     </small><br/>
 
                     <label>Password:</label>
-                    <input style={this.toggleError(1)} type="password" className="form-control" name="password" 
+                    <input style={this.toggleError(1)} type="password" className="form-control" name="password" maxLength="32"
                             value={this.state.password} onChange={this.handleOnChange} />
                     <small style={this.toggleTextError(1)} className="input-error form-text text-muted">
                       Min: 6 characters or too simple
                     </small><br/>
 
                     <label>Confirm password:</label>
-                    <input style={this.toggleError(2)} type="password" className="form-control" name="confirmPassword" 
+                    <input style={this.toggleError(2)} type="password" className="form-control" name="confirmPassword"  maxLength="32"
                             value={this.state.confirmPassword} onChange={this.handleOnChange}/>
                     <small style={this.toggleTextError(2)} className="input-error form-text text-muted">Confirm password is not matching</small><br/>
 
                     <label>Restaurant's name:</label>
-                    <input style={this.toggleError(3)} type="text" className="form-control" name="restaurantName" 
+                    <input style={this.toggleError(3)} type="text" className="form-control" name="restaurantName" maxLength="45"
                             value={this.state.restaurantName} onChange={this.handleOnChange} autoComplete= "new-password"/>
                     <small style={this.toggleTextError(3)} className="input-error form-text text-muted">Restaurant's name cannot be empty</small><br/>
 
@@ -172,7 +172,7 @@ export class RestaurantForm extends Component {
                     </small><br/>
 
                     <label>Phone number:</label>
-                    <input style={this.toggleError(5)} type="text" className="form-control" name="phoneNumber"
+                    <input style={this.toggleError(5)} type="text" className="form-control" name="phoneNumber" maxLength="10"
                             value={this.state.phoneNumber} onChange={this.handleOnChange} autoComplete= "new-password"/>
                     <small style={this.toggleTextError(5)} className="input-error form-text text-muted">
                       Empty or US phone number format is not regconized. Format: 123-123-4567 or 1231234567
