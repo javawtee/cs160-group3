@@ -93,8 +93,7 @@ wss.on("connection", (ws,protocols) => {
                 UserManager.removeOnlineUser(uuid).catch(err => console.log(err)); 
             })
         } else {
-            // else send default initialization of data
-            res.json(payload);
+            console.log("exception"); // any exception not to thought of
         }
     }).catch(() => {
         // found on server session

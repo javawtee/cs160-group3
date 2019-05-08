@@ -5,37 +5,38 @@ var UserManager = require("./userManager");
 
 router.post("/login", (req, res) => {
     var uuid = req.body.uuid; // a reference index for user in back-end
-    var uid = req.body.userId
-    var pw = req.body.password
+    var uid = req.body.userId;
+    var pw = req.body.password;
+    // only restaurant has property address
+    getAddress = (userType, id) => {
+      return new Promise((resolve,reject) => {
+        if(typeof(userType) === "string" && userType === "restaurant"){
+          connection.query("SELECT address FROM restaurant WHERE users_id=?", [id], (err, rows) =>{
+            if(err) {console.log(err); reject(err)}
+            else if (rows.length > 0){
+              resolve(rows[0].address);
+            } else {
+              resolve(null);
+            }
+          })
+        } else {
+          resolve(null);
+        }
+      })
+    }
+    // start authenticate user
     connection.query("SELECT id, userName, userType,phoneNumber,email,approvedDate FROM users" +  
       " WHERE userId=? AND password=? AND approved=1",
       [uid, pw] , (err, rows) => {
-        if(err) throw err
-        else {
-          if(rows.length > 0) {
+        if(err) {console.log(err); throw err;}
+        else if(rows.length > 0) {
             var id = rows[0].id; // users_id
-            // only restaurant has property address
-            getAddress = () => {
-              return new Promise((resolve,reject) => {
-                if(typeof(rows[0].userType) === "string" && rows[0].userType === "restaurant"){
-                  connection.query("SELECT address FROM restaurant WHERE users_id=?", [id], (err, restaurant_rows) =>{
-                    if(err) {console.log(err); throw err}
-                    else if (restaurant_rows.length > 0){
-                      resolve(restaurant_rows[0].address);
-                    }
-                  })
-                } else {
-                  resolve(null);
-                }
-              })
-            }
-            UserManager.getOnlineUsers(uuid).then(() => {
+            var isUserOnline = UserManager.onlineUsers.findIndex(user => user.uuid === uuid) > -1;
+            if(isUserOnline){
               // user is online in different device
               res.json({message:"multiple-access"});
-            }).catch(() => {
-              // able to login
-              getAddress().then(address => {
-                // successfully logged in, store in array of online users
+            } else {
+              getAddress(rows[0].userType, id).then(address => {
                 var serverToken = {
                   uuid,
                   userName: rows[0].userName,
@@ -49,12 +50,11 @@ router.post("/login", (req, res) => {
                 var sUuid = uuid + "server";
                 UserManager.addIdReference({sUuid, id, address});
                 res.json({message:"success", serverToken});
-              });
-            })
-          } else {
-            // else send default initialization of data
-            res.json({message:"failed-to-authenticate"});
-          }
+              }).catch(err => {console.log(err); throw err;}); // SQL error
+            }
+        } else {
+          // failed to authenticat
+          res.json({message:"failed-to-authenticate"});
         }
     })
 });
@@ -121,14 +121,14 @@ router.post('/sign-up/:userType', (req, res) => {
 // not test yet
 router.post("/edit-information", (req,res) => {
   var {uuid, oldPassword, newPassword, phoneNumber, email, address} = req.body;
-  console.log(req.body);
   UserManager.getOnlineUsers(uuid).then(a => {
       var id = a.id;
       if(newPassword === undefined){
         // used to verify password for user info. edition
-        connection.query("SELECT userId from users WHERE id=? AND password=?",[id,oldPassword], err =>{
+        connection.query("SELECT COUNT(id) AS count from users WHERE id=? AND password=?",[id,oldPassword], (err,rows) =>{
           if(err){console.log("ERR-verifyPassword: " + err); throw err;}
-          else res.json("verified");
+          else if(rows[0].count > 0) res.json("verified");
+          else res.json("not-verified");
         })
       } else {
         newPassword = newPassword === "" ? oldPassword : newPassword;

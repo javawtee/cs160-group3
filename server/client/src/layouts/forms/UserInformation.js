@@ -148,6 +148,12 @@ export class UserInformation extends Component {
                     newUserInfo.lastInfoUpdated = (new Date()).getTime(); // to prevent user from editing info continuously
                     sessionStorage.setItem("user-token", JSON.stringify(newUserInfo));
 
+                    //update local token
+                    var local = JSON.parse(localStorage.getItem("user-token"));
+                    var expiration = local.expiration;
+                    newUserInfo.expiration = expiration;
+                    localStorage.setItem("user-token", JSON.stringify(newUserInfo));
+
                     this.setState(initState(this.userInfo()));
                 }
             }) // whenever setState is called, this component will be re-rendered
@@ -208,7 +214,7 @@ export class UserInformation extends Component {
                         <td style={{visibility: (editable && !verified) ? "visible": "hidden"}}>
                             Enter your password:&nbsp;
                             <input type="password" name="oldPassword" value={oldPassword}
-                                onChange={this.handleOnChange}/> &nbsp;
+                                onChange={this.handleOnChange} maxLength="32"/> &nbsp;
                             <button className="btn btn-primary" onClick={this.verifyPassword}>Verify</button>
                         </td>
                     </tr>
@@ -219,7 +225,7 @@ export class UserInformation extends Component {
                         <td>New password: </td>
                         <td>
                             <input className="form-control text-left text-truncate" style={this.toggleError(0)} type="password" name="newPassword" 
-                                value={newPassword} onChange={this.handleOnChange}/>
+                                value={newPassword} onChange={this.handleOnChange} maxLength="32"/>
                             <small style={this.toggleTextError(0)} className="input-error form-text text-muted">
                                 Min: 6 characters or too simple
                             </small>
@@ -229,7 +235,7 @@ export class UserInformation extends Component {
                         <td>Confirm new password: </td>
                         <td>
                             <input className="form-control text-left text-truncate" style={this.toggleError(1)} type="password" name="confirmNewPassword" value={confirmNewPassword}
-                                onChange={this.handleOnChange}/>
+                                onChange={this.handleOnChange} maxLength="32"/>
                             <small style={this.toggleTextError(1)} className="input-error form-text text-muted">
                                 Confirm password is not matching
                             </small>
@@ -239,7 +245,8 @@ export class UserInformation extends Component {
                         <td>Phone Number: </td>
                         <td>
                             <input className="form-control text-left text-truncate" style={this.toggleError(2)} name="phoneNumber" type="text" 
-                                readOnly={verified? false : true} value={phoneNumber} onChange={this.handleOnChange} autoComplete="new-password"/>
+                                readOnly={verified? false : true} value={phoneNumber} onChange={this.handleOnChange} autoComplete="new-password"
+                                maxLength="10"/>
                             <small style={this.toggleTextError(2)} className="input-error form-text text-muted">
                             Empty or US phone number format is not regconized. Format: 123-123-4567 or 1231234567
                             </small>

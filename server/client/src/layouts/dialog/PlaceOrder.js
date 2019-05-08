@@ -370,7 +370,7 @@ export class PlaceOrder extends Component {
                                 <div className="row">
                                     <div className="col-3 pt-1">Phone #: </div>
                                     <div className="col-8">
-                                        <input style={this.toggleError(2)} className="form-control"
+                                        <input style={this.toggleError(2)} className="form-control" maxLength="10"
                                             name="customerPhone" value={this.state.customerPhone} onChange={this.handleOnChange}/>
                                         <small style={this.toggleTextError(2)} className="input-error form-text text-muted">
                                             Empty or US phone number format is not regconized. Format: 123-123-4567 or 1231234567

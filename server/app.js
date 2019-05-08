@@ -11,7 +11,6 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 // view engine setup
 app.engine('html', require('ejs').renderFile); // render view with html
 app.set('view engine', 'html');
@@ -21,23 +20,23 @@ app.set('views', path.join(__dirname, 'views/'));
 const UserManager = require("./api/userManager");
 
 // admin page
-app.get("/", res => {
+app.get("/", (req,res) => {
   UserManager.fetchListOfUsers()
-  .then(listOfUsers => res.render("admin", {listOfUsers}));
+  .then(listOfUsers => res.render("admin", {listOfUsers})).catch(err => console.log(err));
 })
 
 app.get("/approve/:userId/:email", (req, res) => {
   require("./api/connector").query("UPDATE users SET approved=1,approvedDate=NOW() WHERE userId=?",[req.params.userId], err => {
     if(err){console.log(err); throw err;}
     else {
-        require('./api/mailer')(req.params.email, `Welcome to our Delivery Service`
+        require('./api/mailer')(req.params.email, `Welcome to our Delivery Service`,
         `Your account with userID: <b>${req.params.userId}</b> is activated.<br/>
          You are able to login to our service now.<br/>
          Best regards,<br/>
-         Fake customer service`).then(() => alert("success")).catch(() => alert("failure"));
+         Fake customer service`).then(() => res.send("success")).catch(() => res.send("failure"));
         res.redirect("/");
     }
-})
+  })  
 })
 
 // send current password to user's email (ForgotPassword)

@@ -21,11 +21,6 @@ export class LoginForm extends Component {
     onLogin = (e) => {
       e.preventDefault();
       const {userId, password} = this.state;
-      if(localStorage.getItem("user-token") !== null){
-        alert("ALERT! Multiple Access");
-        window.location.href = "https://www.google.com"
-        return;
-      }
       if(userId !== "" && password !== ""){
           const NAMESPACE = "45e669ee-e736-4354-9efc-e1d620b18c69"; // random UUID
           const uuid = uuid5(userId, NAMESPACE)
@@ -45,7 +40,7 @@ export class LoginForm extends Component {
               this.props.switchToConsole(); // passing to HomePage
             } else if (resp.message === "multiple-access") {
               alert("ALERT! Multiple Access");
-              window.location.href = "https://www.google.com"
+              window.location.href = "/"
             } else {
               alert("UserID or Password is incorrect");
             }

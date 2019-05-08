@@ -70,8 +70,10 @@ export class RestaurantConsole extends Component {
     }
     ws.onclose = () => {
       console.log("connection closed");
-      alert("ALERT! Multiple Access");
-      window.location.href = "https://www.google.com";
+      alert("ALERT! Server crashes. Restarting");
+      // remove tokens => force to logout
+      Auth.logout();
+      window.location.href = "/";
     }
   }
 
