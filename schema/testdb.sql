@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th5 08, 2019 lúc 07:05 AM
+-- Thời gian đã tạo: Th5 08, 2019 lúc 10:41 AM
 -- Phiên bản máy phục vụ: 10.1.38-MariaDB
 -- Phiên bản PHP: 7.3.2
 
@@ -25,20 +25,6 @@ SET time_zone = "+00:00";
 CREATE DATABASE testdb;
 
 use testdb;
-
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `menu`
---
-
-CREATE TABLE `menu` (
-  `menuId` int(11) NOT NULL,
-  `restaurantId` int(11) NOT NULL,
-  `itemCategory` varchar(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'food',
-  `itemName` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `itemPrice` double DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -74,6 +60,10 @@ CREATE TABLE `restaurant` (
   `logoUrl` varchar(120) COLLATE utf8_unicode_ci DEFAULT 'restaurant-logo.jpg'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+--
+-- Đang đổ dữ liệu cho bảng `restaurant`
+--
+
 -- --------------------------------------------------------
 
 --
@@ -94,37 +84,20 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `users`
---
-
-INSERT INTO `users` (`id`, `userId`, `password`, `userName`, `userType`, `phoneNumber`, `email`, `submittedDate`, `approved`, `approvedDate`) VALUES
-(8, 'tester1', '123', 'a restaurant', 'restaurant', '123', 'javawtee@gmail.com', '2019-05-07 21:32:24', 1, '2019-05-07 21:34:32');
-
---
 -- Chỉ mục cho các bảng đã đổ
 --
-
---
--- Chỉ mục cho bảng `menu`
---
-ALTER TABLE `menu`
-  ADD PRIMARY KEY (`menuId`),
-  ADD KEY `fk_menu_restaurant_idx` (`restaurantId`);
 
 --
 -- Chỉ mục cho bảng `orders`
 --
 ALTER TABLE `orders`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `fk-orders-restaurant_idx` (`restaurant_id`),
-  ADD KEY `fk-driver-users_idx` (`driver_id`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Chỉ mục cho bảng `restaurant`
 --
 ALTER TABLE `restaurant`
-  ADD PRIMARY KEY (`restaurantId`),
-  ADD KEY `fk-restaurant-users_idx` (`users_id`);
+  ADD PRIMARY KEY (`restaurantId`);
 
 --
 -- Chỉ mục cho bảng `users`
@@ -138,38 +111,22 @@ ALTER TABLE `users`
 --
 
 --
--- AUTO_INCREMENT cho bảng `menu`
---
-ALTER TABLE `menu`
-  MODIFY `menuId` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT cho bảng `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
 
 --
 -- AUTO_INCREMENT cho bảng `restaurant`
 --
 ALTER TABLE `restaurant`
-  MODIFY `restaurantId` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `restaurantId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
 
 --
 -- AUTO_INCREMENT cho bảng `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
-
---
--- Các ràng buộc cho các bảng đã đổ
---
-
---
--- Các ràng buộc cho bảng `menu`
---
-ALTER TABLE `menu`
-  ADD CONSTRAINT `fk_menu_restaurant` FOREIGN KEY (`restaurantId`) REFERENCES `restaurant` (`restaurantId`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

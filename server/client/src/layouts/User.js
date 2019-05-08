@@ -72,7 +72,7 @@ export class User extends Component {
         this.setState({history: resp.rows});
       } else {
         // no result
-        console.log("failed to load history")
+        console.log("no result")
       }
     }).catch(msg => {
       if(msg === "error"){

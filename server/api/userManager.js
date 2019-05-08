@@ -145,11 +145,10 @@ class UserManager {
                     var lastSession = JSON.parse(data).session;
                     if(lastSession !== null){
                         const {
-                            idReferences, onlineUsers, availableDrivers, deliveringDrivers, 
+                            idReferences, availableDrivers, deliveringDrivers, 
                             tobeNotifiedDrivers, tobeNotifiedRestaurants, pendingOrders
                         } = lastSession;
                         this.idReferences = idReferences;
-                        this.onlineUsers = onlineUsers;
                         this.availableDrivers = availableDrivers;
                         this.deliveringDrivers = deliveringDrivers;
                         this.pendingOrders = pendingOrders;
@@ -164,11 +163,11 @@ class UserManager {
 
         this.writeSession = () => {
             const {
-                idReferences, onlineUsers, availableDrivers, deliveringDrivers, 
+                idReferences, availableDrivers, deliveringDrivers, 
                 pendingOrders, tobeNotifiedRestaurants, tobeNotifiedDrivers
             } = this;
             const session = {
-                idReferences, onlineUsers, availableDrivers, deliveringDrivers, 
+                idReferences, availableDrivers, deliveringDrivers, 
                 pendingOrders, tobeNotifiedRestaurants, tobeNotifiedDrivers
             };
             fs.writeFile(corrupted, JSON.stringify({date:new Date(), session}), err => {
@@ -192,7 +191,7 @@ class UserManager {
 
     // ---- SERVER
     addIdReference(user){ // user is a JSON with super reference id (sSuid), users_id (id)
-        var exists = this.idReferences.filter(ref => ref.sUuid === user.sUuid).length > 0 ;
+        var exists = this.idReferences.findIndex(ref => ref.sUuid === user.sUuid) > -1 ;
         if(!exists){
             this.idReferences.push(user);
             // store it to local in case server is down, losing all user's session
@@ -201,38 +200,34 @@ class UserManager {
     }
 
     addOnlineUsers(user){ // user is a JSON with reference id (uuid), users_id (id), and address (restaurant.address || null)
-        var exists = this.onlineUsers.filter(onlineUser => onlineUser.uuid === user.uuid).length > 0 ;
+        var exists = this.onlineUsers.findIndex(onlineUser => onlineUser.uuid === user.uuid) > -1 ;
         if(!exists){
             this.onlineUsers.push(user);
             // store it to local in case server is down, losing all user's session
-            this.writeSession();
+            // NO. when server is down and restarts, kick all the users on session
         }
     }
 
     removeOnlineUser(uuid){
         return new Promise((resolve, reject) => {
-            var exists = this.onlineUsers.filter(user => user.uuid === uuid).length > 0;
-            //console.log(exists);
+            var exists = this.onlineUsers.findIndex(user => user.uuid === uuid) > -1;
             if(exists){
                 var rmIndex = this.onlineUsers.findIndex(user => user.uuid === uuid);
-                //console.log("index to remove: " + rmIndex);
                 this.onlineUsers.splice(rmIndex, 1);
-                //console.log(this.onlineUsers);
-                this.writeSession();
                 resolve("Removed");
-            } else reject("User is not found")
+            } else reject("User is not found or removed");
         })    
     }
     
     getOnlineUsers(uuid){
         return new Promise((resolve,reject) => {
-            this.onlineUsers.map(user => {
-                if(user.uuid === uuid){
-                    var id = user.id;
-                    var address = user.address; // restaurant.address || null
-                    return resolve({id, address});
-                }
-            })
+            var userIndex = this.onlineUsers.findIndex(user => user.uuid === uuid);
+            if(userIndex > -1){
+                var user = this.onlineUsers[userIndex];
+                var id = user.id;
+                var address = user.address; // restaurant.address || null
+                return resolve({id, address});
+            }
             return reject("no reference id like " + uuid + " exists");
         });
     }
@@ -249,7 +244,7 @@ class UserManager {
     // ---- DRIVER
     addAvailableDriver(driver){
         console.log("A driver becomes available");
-        if(this.availableDrivers.filter(availableDriver => availableDriver.uuid === driver.uuid).length === 0){
+        if(this.availableDrivers.findIndex(availableDriver => availableDriver.uuid === driver.uuid) < 0){
             this.availableDrivers.push(driver); // new driver will be added to the end of the "queue"
             this.writeSession();
         }
@@ -263,22 +258,21 @@ class UserManager {
     }
 
     addDeliveringDriver(driver){ // driver = {uuid, deliveryDetails:{restaurant:{name, address}, orders:[{order1, order2}]}}
+        console.log("A driver starts a delivery");
         this.deliveringDrivers.push(driver);
         this.writeSession();
         // ---- persist data : update driver id to order driver_id
         this.getOnlineUsers(driver.uuid).then(res => {
             var driver_id = res.id;
-            var orders = driver.deliveryDetails.orders;
-            var query = `UPDATE orders SET driver_id=? WHERE id=?`
-            query.concat(orders.length === 1 ? `` : ` OR id=?`)
-            var values = [driver_id, orders[0].id]
-            values = orders.length > 1 ? values.push(orders[1].id) : values;
-            connection.query(query, values, (err) => {
-                if(err) {console.log(err); throw err}
+            driver.deliveryDetails.orders.forEach(order => {
+                connection.query("UPDATE orders SET driver_id=? WHERE id=?", [driver_id, order.id], (err) => {
+                    if(err) {console.log(err); throw err}
+                })
             })
         })
     }
     removeDeliveringDriver(uuid){
+        console.log("A driver completed a delivery");
         var rmIndex = this.deliveringDrivers.findIndex(driver => driver.uuid === uuid);
         this.deliveringDrivers.splice(rmIndex, 1);
         this.writeSession();
@@ -319,10 +313,9 @@ class UserManager {
             }
             // ---- persist data: update order.deliveryStatus
             connection.query("UPDATE orders SET delivery_status=?, driver_location=? WHERE id=?", 
-                    [deliveryStatus, JSON.stringify(driverLocation), order.id], 
-                        (err) => {
-                                if(err) {console.log(err); throw err }
-                    }
+                [deliveryStatus, JSON.stringify(driverLocation), order.id], 
+                    (err) => { if(err) {console.log(err); throw err }
+                }
             )
         })
     }

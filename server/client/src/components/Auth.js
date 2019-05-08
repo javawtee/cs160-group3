@@ -19,6 +19,7 @@ class Auth {
     isAuthenticated(){
         var token = localStorage.getItem("user-token");
         if(token !== null) {
+            localStorage.setItem("user-token", token);
             token = JSON.parse(token);
             if(token.expiration - (new Date()).getTime() <= 0){
                 alert("Your token is expired. Please log-in again");

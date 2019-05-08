@@ -120,7 +120,7 @@ export class DriverForm extends Component {
             <div className="row" style={{padding: "2% 10%"}}>
                 <div className="col">
                   <label>User ID:</label>
-                  <input style={this.toggleError(0)} type="text" className="form-control" name="userId" autoFocus
+                  <input style={this.toggleError(0)} type="text" className="form-control" name="userId" autoFocus maxLength="20"
                           value={this.state.userId} onChange={this.handleOnChange} onBlur={this.validateUserId} autoComplete="new-password"/>
                   <small style={this.toggleTextError(0)} className="input-error form-text text-muted">
                       Min: 6, max: 20 characters or the format is not regconized (no space or !@#$%^&*)
@@ -131,14 +131,14 @@ export class DriverForm extends Component {
 
                   <label>Password:</label>
                   <input style={this.toggleError(1)} type="password" className="form-control" name="password" 
-                          value={this.state.password} onChange={this.handleOnChange}/>
+                          value={this.state.password} onChange={this.handleOnChange} maxLength="32"/>
                   <small style={this.toggleTextError(1)} className="input-error form-text text-muted">
                       Min: 6 characters or too simple
                     </small><br/>
 
                   <label>Confirm password:</label>
                   <input style={this.toggleError(2)} type="password" className="form-control" name="confirmPassword" 
-                          value={this.state.confirmPassword} onChange={this.handleOnChange}/>
+                          value={this.state.confirmPassword} onChange={this.handleOnChange} maxLength="32"/>
                   <small style={this.toggleTextError(2)} className="input-error form-text text-muted">Confirm password is not matching</small><br/>
                 </div>
                 <div className="w-100"></div>
@@ -146,21 +146,21 @@ export class DriverForm extends Component {
                 <div className="col-6">
                     <label>Last name:</label>
                     <input style={this.toggleError(3)} type="text" 
-                            className="form-control" name="lastName" placeholder="Last name"
+                            className="form-control" name="lastName" placeholder="Last name" maxLength="22"
                             value={this.state.lastName} onChange={this.handleOnChange} autoComplete="new-password"/>
                     <small style={this.toggleTextError(3)} className="input-error form-text text-muted">Last name cannot be empty</small>
                 </div>
                 <div className="col-6">
                     <label>First name:</label>
                     <input style={this.toggleError(4)} type="text" className="form-control" name="firstName" placeholder="First name"
-                            value={this.state.firstName} onChange={this.handleOnChange} autoComplete="new-password"/>
+                            value={this.state.firstName} onChange={this.handleOnChange} autoComplete="new-password" maxLength="22"/>
                     <small style={this.toggleTextError(4)} className="input-error form-text text-muted">First name cannot be empty</small>
                 </div>
                 <div className="w-100"></div>
 
                 <div className="col" style={{marginTop:"10px"}}>
                     <label>Phone number:</label>
-                    <input style={this.toggleError(5)} type="text" className="form-control" name="phoneNumber"
+                    <input style={this.toggleError(5)} type="text" className="form-control" name="phoneNumber" maxLength="10"
                            value={this.state.phoneNumber} onChange={this.handleOnChange} autoComplete="new-password"/>
                     <small style={this.toggleTextError(5)} className="input-error form-text text-muted">
                         Empty or US phone number format is not regconized. Format: 123-123-4567 or 1231234567

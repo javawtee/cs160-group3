@@ -1,4 +1,5 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
+import Auth from "../../components/Auth";
 import DriverIncomingRequest from "../dialog/DriverIncomingRequest";
 import DriverNavigation from "../dialog/DriverNavigation";
 
@@ -72,8 +73,10 @@ export class DriverConsole extends Component {
     };
     ws.onclose = () => {
       console.log("connection closed");
-      alert("ALERT! Multiple Access");
-      window.location.href = "https://www.google.com";
+      alert("ALERT! Server crashes. Restarting");
+      // remove tokens => force to logout
+      Auth.logout();
+      window.location.href = "/";
     }
   }
 
