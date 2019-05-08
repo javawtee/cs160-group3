@@ -13,25 +13,59 @@ class Auth {
     logout = () => {
         sessionStorage.removeItem("user-token");
         localStorage.removeItem("user-token");
-        localStorage.removeItem("user-lock");
     }
 
     isAuthenticated(){
         var token = localStorage.getItem("user-token");
         if(token !== null) {
-            localStorage.setItem("user-token", token);
             token = JSON.parse(token);
-            if(token.expiration - (new Date()).getTime() <= 0){
-                alert("Your token is expired. Please log-in again");
-                // token is expired, require new token
-                //var uuid = token.uuid;
-                // force to logout => remove localStorage
+            console.log(token)
+            if(token.uuid && token.uuid !== ""){
+                // valid token
+                // check whether user is login
+                var uuid = token.uuid;
+                console.log(uuid);
+                console.log(sessionStorage.getItem("user-token"));
+                if(sessionStorage.getItem("user-token")){
+                    console.log("prevent logging out when user refreshes the page");
+                    return true;
+                }
+                
+                fetch("/user/is-logged", {
+                    method: "POST",
+                    headers: {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({uuid})
+                }).then(res => res.json())
+                .then(message => {
+                    console.log(message);
+                    if(message === "on-session"){
+                        alert("ALERT! Multiple Access");
+                        window.location.href = "/";
+                        return false;
+                    } else {
+                        // is not on server session
+                        localStorage.setItem("user-token", JSON.stringify(token));
+                        if(token.expiration - (new Date()).getTime() <= 0){
+                            alert("Your token is expired. Please log-in again");
+                            // token is expired, require new token
+                            // force to logout => remove localStorage
+                            this.logout();
+                            return false;
+                        }
+                        delete token.expiration; // sessionStorage doesn't need this
+                        sessionStorage.setItem("user-token", JSON.stringify(token));
+                        return true;
+                    }
+                })
+            } else {
+                // invalid token
+                console.log("Invalid token. Forced to logout")
                 this.logout();
                 return false;
             }
-            delete token.expiration; // sessionStorage doesn't need this
-            sessionStorage.setItem("user-token", JSON.stringify(token));
-            return true;
         }
         return false;
     }
